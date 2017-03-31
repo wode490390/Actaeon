@@ -9,6 +9,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.RouteFinder;
+import me.onebone.actaeon.task.RouteFinderSearchAsyncTask;
 
 abstract public class MovingEntity extends EntityCreature{
 	private boolean isKnockback = false;
@@ -59,6 +60,7 @@ abstract public class MovingEntity extends EntityCreature{
 
 			Node node = this.route.get();
 			if(node != null){
+				level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
 				Vector3 vec = node.getVector3();
 				double diffX = Math.pow(vec.x - this.x, 2);
 				double diffZ = Math.pow(vec.z - this.z, 2);
@@ -87,6 +89,7 @@ abstract public class MovingEntity extends EntityCreature{
 		this.checkGround();
 		if(!this.onGround){
 			this.motionY -= this.getGravity();
+			//Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
 			hasUpdate = true;
 		}
 

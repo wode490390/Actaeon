@@ -64,14 +64,29 @@ public class AdvancedRouteFinder extends RouteFinder{
 				List<Node> nodes = new ArrayList<>();
 
 				nodes.add(node);
+				Node last = node;
 				while((node = node.getParent()) != null){
+					Node lastNode = nodes.get(nodes.size() - 1);
 					node.add(0.5, 0, 0.5);
-					//level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
-
-					nodes.add(node);
-				};
+					if (lastNode.getY() == node.getY()) {  //Y不改变
+						Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
+						WalkableIterator iterator = new WalkableIterator(this, level, lastNode.getVector3(), direction, 0, (int)lastNode.getVector3().distance(node.getVector3()) + 1);
+						if (iterator.hasNext()) {  //无法直接到达
+							level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
+							nodes.add(last);
+							level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+							nodes.add(node);
+						} else {
+							level.addParticle(new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()));
+						}
+					} else {  //Y变了直接放入list
+						level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+						nodes.add(node);
+					}
+					last = node;
+				}
 				Collections.reverse(nodes);
-				nodes.remove(0);
+				//nodes.remove(0);
 
 				nodes.forEach(this::addNode);
 				this.succeed = true; this.searching = false;
@@ -150,7 +165,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 		return null;
 	}
 
-	private double isWalkableAt(Vector3 vec){
+	public double isWalkableAt(Vector3 vec){
 		Block block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
 		if(block == null) return -256;
 

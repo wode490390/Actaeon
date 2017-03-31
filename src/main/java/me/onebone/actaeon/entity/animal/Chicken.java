@@ -22,6 +22,11 @@ public class Chicken extends Animal implements EntityAgeable, Fallable{
 	}
 
 	@Override
+	protected float getGravity() {
+		return 0.05f;
+	}
+
+	@Override
 	public float getHeight(){
 		if (isBaby()){
 			return 0.51f;

@@ -9,6 +9,18 @@ import me.onebone.actaeon.entity.animal.Pig;
 import me.onebone.actaeon.entity.animal.Sheep;
 
 public class Actaeon extends PluginBase{
+
+	private static Actaeon instance;
+
+	public static Actaeon getInstance() {
+		return instance;
+	}
+
+	@Override
+	public void onLoad() {
+		if (instance == null) instance = this;
+	}
+
 	public void onEnable(){
 		this.saveDefaultConfig();
 

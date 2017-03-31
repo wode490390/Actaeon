@@ -39,7 +39,7 @@ public class Pig extends Animal implements EntityAgeable{
 	@Override
 	public boolean entityBaseTick(int tickDiff){
 		if(!this.hasTarget()){
-			Entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(this.x, this.y, this.z, this.x, this.y, this.z).expand(7, 7, 7));
+			Entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(this.x, this.y, this.z, this.x, this.y, this.z).expand(550, 550, 550));
 			Entity near = null;
 
 			for(Entity entity : entities){

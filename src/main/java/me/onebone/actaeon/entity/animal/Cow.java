@@ -3,10 +3,13 @@ package me.onebone.actaeon.entity.animal;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
+
+import java.util.Random;
 
 public class Cow extends Animal implements EntityAgeable{
 	public static final int NETWORK_ID = 11;
@@ -48,7 +51,14 @@ public class Cow extends Animal implements EntityAgeable{
 
 	@Override
 	public Item[] getDrops(){
-		return new Item[]{Item.get(Item.LEATHER), Item.get(Item.RAW_BEEF)};
+		Random random = new Random();
+		Item leather = Item.get(Item.LEATHER, 0, random.nextInt(3));
+		Item meat = Item.get(Item.RAW_BEEF, 0, random.nextInt(3) + 1);
+		EntityDamageEvent cause = this.getLastDamageCause();
+		if (cause.getCause() == EntityDamageEvent.CAUSE_FIRE) {
+			meat = Item.get(Item.STEAK, 0, random.nextInt(3) + 1);
+		}
+		return new Item[]{leather, meat};
 	}
 
 	@Override
