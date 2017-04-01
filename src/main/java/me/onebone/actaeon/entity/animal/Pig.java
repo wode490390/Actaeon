@@ -1,18 +1,17 @@
 package me.onebone.actaeon.entity.animal;
 
-import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
+import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 public class Pig extends Animal implements EntityAgeable{
 	public static final int NETWORK_ID = 12;
 
 	public Pig(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
+		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
 	}
 
 	@Override
@@ -38,26 +37,7 @@ public class Pig extends Animal implements EntityAgeable{
 
 	@Override
 	public boolean entityBaseTick(int tickDiff){
-		if(!this.hasTarget()){
-			Entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(this.x, this.y, this.z, this.x, this.y, this.z).expand(550, 550, 550));
-			Entity near = null;
-
-			for(Entity entity : entities){
-				if(entity instanceof Player && (near == null || this.distance(near) < this.distance(entity))){
-					if(((Player) entity).getInventory().getItemInHand().getId() == Item.CARROT){
-						near = entity;
-					}
-				}
-			}
-
-			this.setTarget(near, "Pig");
-		}
-
 		return super.entityBaseTick(tickDiff);
-	}
-
-	public boolean hasTarget(){
-		return super.hasFollowingTarget() && this.getTarget() instanceof Player && ((Player) this.getTarget()).getInventory().getItemInHand().getId() == Item.WHEAT;
 	}
 
 	@Override

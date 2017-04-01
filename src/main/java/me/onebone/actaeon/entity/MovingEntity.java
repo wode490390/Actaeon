@@ -1,5 +1,6 @@
 package me.onebone.actaeon.entity;
 
+import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
@@ -9,11 +10,14 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.RouteFinder;
+import me.onebone.actaeon.route.SimpleRouteFinder;
+import me.onebone.actaeon.target.TargetFinder;
 import me.onebone.actaeon.task.RouteFinderSearchAsyncTask;
 
 abstract public class MovingEntity extends EntityCreature{
 	private boolean isKnockback = false;
 	private RouteFinder route = null;
+	private TargetFinder targetFinder = null;
 	private Vector3 target = null;
 	private String targetSetter = "";
 
@@ -21,6 +25,7 @@ abstract public class MovingEntity extends EntityCreature{
 		super(chunk, nbt);
 
 		this.route = new AdvancedRouteFinder(this);
+		//this.route = new SimpleRouteFinder(this);
 	}
 
 	public void jump(){
@@ -46,11 +51,13 @@ abstract public class MovingEntity extends EntityCreature{
 		this.motionX *= (1 - this.getDrag());
 		this.motionZ *= (1 - this.getDrag());
 
-		if(this.onGround && this.hasSetTarget() && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
-			this.route.setPositions(this.level, this, this.getTarget(), this.boundingBox);
+		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
-			if(this.route.isSearching()) this.route.research();
-			else this.route.search();
+		if(this.onGround && this.hasSetTarget() && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
+            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+
+			/*if(this.route.isSearching()) this.route.research();
+			else this.route.search();*/
 
 			hasUpdate = true;
 		}
@@ -80,6 +87,14 @@ abstract public class MovingEntity extends EntityCreature{
 				}
 			}
 		}
+
+        for (Entity entity: this.getLevel().getCollidingEntities(this.boundingBox)) {
+            if (this.canCollide() && this.canCollideWith(entity)) {
+                Vector3 motion = this.subtract(entity);
+                this.motionX += motion.x / 2;
+                this.motionZ += motion.z / 2;
+            }
+        }
 
 		if((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally){
 			this.jump();
@@ -114,9 +129,10 @@ abstract public class MovingEntity extends EntityCreature{
 		}
 
 		if(this.hasSetTarget() && (forceSearch || !this.route.hasRoute())){
-			this.route.setPositions(this.level, this, this.target, this.boundingBox.clone());
-			if(this.route.isSearching()) this.route.research();
-			else this.route.search();
+            this.route.forceStop();
+            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox.clone()));
+			/*if(this.route.isSearching()) this.route.research();
+			else this.route.search();*/
 		}
 	}
 
@@ -182,4 +198,16 @@ abstract public class MovingEntity extends EntityCreature{
 	public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
 		this.level.addEntityMovement(this.chunk.getX(), this.chunk.getZ(), this.id, x, y - this.getEyeHeight(), z, yaw, pitch, headYaw);
 	}
+
+    public void setRoute(RouteFinder route) {
+        this.route = route;
+    }
+
+    public RouteFinder getRoute() {
+        return route;
+    }
+
+    public void setTargetFinder(TargetFinder targetFinder) {
+        this.targetFinder = targetFinder;
+    }
 }

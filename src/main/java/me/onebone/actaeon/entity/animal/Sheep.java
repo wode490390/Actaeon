@@ -6,6 +6,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
+import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 import java.util.Random;
 
@@ -14,6 +15,7 @@ public class Sheep extends Animal{
 
 	public Sheep(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
+		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
 	}
 
 	@Override
@@ -54,26 +56,7 @@ public class Sheep extends Animal{
 
 	@Override
 	public boolean entityBaseTick(int tickDiff){
-		if(!this.hasTarget()){
-			Entity[] entities = this.level.getNearbyEntities(new AxisAlignedBB(this.x, this.y, this.z, this.x, this.y, this.z).expand(7, 7, 7));
-			Entity near = null;
-
-			for(Entity entity : entities){
-				if(entity instanceof Player && (near == null || this.distance(near) < this.distance(entity))){
-					if(((Player) entity).getInventory().getItemInHand().getId() == Item.WHEAT){
-						near = entity;
-					}
-				}
-			}
-
-			this.setTarget(near, "Sheep");
-		}
-
 		return super.entityBaseTick(tickDiff);
-	}
-
-	public boolean hasTarget(){
-		return super.hasFollowingTarget() && this.getTarget() instanceof Player && ((Player) this.getTarget()).getInventory().getItemInHand().getId() == Item.WHEAT;
 	}
 
 	@Override

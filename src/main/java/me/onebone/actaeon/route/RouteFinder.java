@@ -19,6 +19,8 @@ public abstract class RouteFinder{
 
 	protected MovingEntity entity = null;
 
+	protected boolean forceStop = false;
+
 	public RouteFinder(MovingEntity entity){
 		if(entity == null) throw new IllegalArgumentException("Entity cannot be null");
 
@@ -91,6 +93,10 @@ public abstract class RouteFinder{
 		this.nodes.clear();
 		this.arrived = false;
 		this.current = 0;
+	}
+
+	public void forceStop() {
+		this.forceStop = true;
 	}
 
 	protected void addNode(Node node){

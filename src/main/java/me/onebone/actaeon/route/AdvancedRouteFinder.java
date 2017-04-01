@@ -31,33 +31,39 @@ public class AdvancedRouteFinder extends RouteFinder{
 
 	@Override
 	public boolean search(){
+		this.succeed = false;
+		this.searching = true;
+
 		if(this.getStart() == null || this.getDestination() == null){
 			return this.succeed = this.searching = false;
 		}
 
 		this.resetNodes();
 		Node start = new Node(this.getStart().floor());
-		start.f = start.g = 0;
-
-		open.add(start);
-		this.grid.putNode(start.getVector3(), start);
-
 		Node endNode = new Node(this.realDestination.floor());
-		this.grid.putNode(endNode.getVector3(), endNode);
-
-		this.succeed = false;
-		this.searching = true;
+		try {
+			start.f = start.g = 0;
+			open.add(start);
+			this.grid.putNode(start.getVector3(), start);
+			this.grid.putNode(endNode.getVector3(), endNode);
+		} catch (Exception e) {
+			return this.succeed = this.searching = false;
+		}
 
 		int limit = 500;
 		while(!open.isEmpty() && limit-- > 0){
 			Node node = null;
 
 			double f = Double.MAX_VALUE;
-			for(Node cur : this.open){
-				if(cur.f < f && cur.f != -1){
-					node = cur;
-					f = cur.f;
+			try {
+				for(Node cur : this.open){
+					if(cur.f < f && cur.f != -1){
+						node = cur;
+						f = cur.f;
+					}
 				}
+			} catch (Exception e) {
+				return this.succeed = this.searching = false;
 			}
 
 			if(endNode.equals(node)){
@@ -68,22 +74,27 @@ public class AdvancedRouteFinder extends RouteFinder{
 				while((node = node.getParent()) != null){
 					Node lastNode = nodes.get(nodes.size() - 1);
 					node.add(0.5, 0, 0.5);
-					if (lastNode.getY() == node.getY()) {  //Y不改变
-						Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
+					Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
+					if (lastNode.getY() == node.getY() && direction.lengthSquared() > 0) {  //Y不改变
 						WalkableIterator iterator = new WalkableIterator(this, level, lastNode.getVector3(), direction, 0, (int)lastNode.getVector3().distance(node.getVector3()) + 1);
 						if (iterator.hasNext()) {  //无法直接到达
-							level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
+							//level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
 							nodes.add(last);
-							level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+							//level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
 							nodes.add(node);
 						} else {
-							level.addParticle(new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()));
+							//level.addParticle(new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()));
 						}
 					} else {  //Y变了直接放入list
-						level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+						//level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
 						nodes.add(node);
 					}
 					last = node;
+					if (this.forceStop) {
+						this.resetNodes();
+						this.forceStop = false;
+						return this.succeed = this.searching = false;
+					}
 				}
 				Collections.reverse(nodes);
 				//nodes.remove(0);

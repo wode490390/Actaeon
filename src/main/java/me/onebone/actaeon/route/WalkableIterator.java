@@ -71,7 +71,7 @@ public class WalkableIterator implements Iterator<Block> {
             }
             this.currentPosition = next;
             this.currentDistance = this.currentPosition.distance(this.startPosition);
-            if (this.maxDistance != 0 && this.currentDistance > this.maxDistance) this.end = true;
+            if (this.maxDistance > 0 && this.currentDistance > this.maxDistance) this.end = true;
         } while (!this.end);
     }
 
