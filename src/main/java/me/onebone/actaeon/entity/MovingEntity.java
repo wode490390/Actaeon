@@ -28,10 +28,21 @@ abstract public class MovingEntity extends EntityCreature{
 		//this.route = new SimpleRouteFinder(this);
 	}
 
+	@Override
+	protected float getGravity() {
+		return 0.092f;
+	}
+
 	public void jump(){
 		if(this.onGround){
-			this.motionY = 0.42;
+			this.motionY = 0.35;
 		}
+	}
+
+	@Override
+	public boolean onUpdate(int currentTick) {
+		super.onUpdate(currentTick);
+		return true;
 	}
 
 	@Override
@@ -42,9 +53,9 @@ abstract public class MovingEntity extends EntityCreature{
 
 		boolean hasUpdate = super.entityBaseTick(tickDiff);
 
-		if(this.isKnockback){                   // knockback 이 true 인 경우는 맞은 직후
-			this.isKnockback = false;           // 다음으로 땅에 닿을 때 knockback 으로 인한 움직임을 멈춘다.
-		}else if(this.onGround){
+		if (this.isKnockback) {                   // knockback 이 true 인 경우는 맞은 직후
+
+		} else if(this.onGround) {
 			this.motionX = this.motionZ = 0;
 		}
 
@@ -62,19 +73,20 @@ abstract public class MovingEntity extends EntityCreature{
 			hasUpdate = true;
 		}
 
-		if(!this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()){ // entity has route to go
+		if(!this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()){ // entity has route to go
 			hasUpdate = true;
 
 			Node node = this.route.get();
 			if(node != null){
-				level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
-				Vector3 vec = node.getVector3();
+				//level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
+                Vector3 vec = node.getVector3();
 				double diffX = Math.pow(vec.x - this.x, 2);
 				double diffZ = Math.pow(vec.z - this.z, 2);
 
 				if(diffX + diffZ == 0){
 					if(!this.route.next()){
 						this.route.arrived();
+                        //Server.getInstance().getLogger().warning(vec.toString());
 					}
 				}else{
 					int negX = vec.x - this.x < 0 ? -1 : 1;
@@ -106,6 +118,8 @@ abstract public class MovingEntity extends EntityCreature{
 			this.motionY -= this.getGravity();
 			//Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
 			hasUpdate = true;
+		} else {
+			this.isKnockback = false;
 		}
 
 		return hasUpdate;
@@ -135,6 +149,10 @@ abstract public class MovingEntity extends EntityCreature{
 			else this.route.search();*/
 		}
 	}
+
+    public Vector3 getRealTarget() {
+        return this.target;
+    }
 
 	public Vector3 getTarget(){
 		return new Vector3(this.target.x, this.target.y, this.target.z);
@@ -191,7 +209,7 @@ abstract public class MovingEntity extends EntityCreature{
 	public void knockBack(Entity attacker, double damage, double x, double z, double base){
 		this.isKnockback = true;
 
-		super.knockBack(attacker, damage, x, z, base);
+		super.knockBack(attacker, damage, x, z, base / 2);
 	}
 
 	@Override

@@ -55,6 +55,7 @@ public class RouteFinderSearchAsyncTask extends AsyncTask {
             }
         }
         Server.getInstance().getLogger().warning("异步寻路线程-" + this.getTaskId() + " 超过等待限制");
+        this.route.forceStop();
 
     }
 }

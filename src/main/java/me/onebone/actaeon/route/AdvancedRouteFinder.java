@@ -68,7 +68,6 @@ public class AdvancedRouteFinder extends RouteFinder{
 
 			if(endNode.equals(node)){
 				List<Node> nodes = new ArrayList<>();
-
 				nodes.add(node);
 				Node last = node;
 				while((node = node.getParent()) != null){
@@ -96,10 +95,19 @@ public class AdvancedRouteFinder extends RouteFinder{
 						return this.succeed = this.searching = false;
 					}
 				}
+
 				Collections.reverse(nodes);
-				//nodes.remove(0);
+
+				nodes.remove(nodes.size() - 1);
+				Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
+				if (highestUnder != null) {
+					Node realDestinationNode = new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ()));
+					realDestinationNode.setParent(node);
+					nodes.add(realDestinationNode);
+				}
 
 				nodes.forEach(this::addNode);
+
 				this.succeed = true; this.searching = false;
 				return true;
 			}
@@ -204,7 +212,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 	}
 
 	@Override
-	public void resetNodes(){
+	public synchronized void resetNodes(){
 		super.resetNodes();
 
 		this.grid.clear();
