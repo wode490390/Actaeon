@@ -1,12 +1,14 @@
 package me.onebone.actaeon.entity;
 
 import cn.nukkit.Server;
+import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.RouteFinder;
@@ -64,7 +66,7 @@ abstract public class MovingEntity extends EntityCreature{
 
 		if (this.targetFinder != null) this.targetFinder.onUpdate();
 
-		if(this.onGround && this.hasSetTarget() && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
+		if(this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)){ // 대상이 이동함
             Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
 
 			/*if(this.route.isSearching()) this.route.research();
@@ -196,6 +198,28 @@ abstract public class MovingEntity extends EntityCreature{
 		}
 
 		this.onGround = (maxY == this.boundingBox.minY);
+	}
+
+	@Override
+	public void setHealth(float health) {
+		super.setHealth(health);
+		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
+		pk0.entityId = this.getId();
+		pk0.entries = new Attribute[]{
+				Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+		};
+		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
+	}
+
+	@Override
+	public void setMaxHealth(int maxHealth) {
+		super.setMaxHealth(maxHealth);
+		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
+		pk0.entityId = this.getId();
+		pk0.entries = new Attribute[]{
+				Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+		};
+		this.getLevel().addChunkPacket(this.chunk.getX(), this.chunk.getZ(), pk0);
 	}
 
 	@Override

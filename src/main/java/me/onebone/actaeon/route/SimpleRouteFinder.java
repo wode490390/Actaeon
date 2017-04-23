@@ -9,6 +9,7 @@ public class SimpleRouteFinder extends RouteFinder{
 
 	@Override
 	public boolean search(){
+		this.stopRouteFindUntil = System.currentTimeMillis() + 100;
 		this.resetNodes();
 
 		this.addNode(new Node(this.getDestination())); // just go straight

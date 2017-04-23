@@ -44,6 +44,7 @@ public class RouteFinderSearchAsyncTask extends AsyncTask {
             if (!this.route.isSearching()) {
                 if (this.level != null) this.route.setPositions(this.level, this.start, this.dest, this.bb);
                 this.route.search();
+                //Server.getInstance().getLogger().notice("异步寻路线程-" + this.getTaskId() + " 开始寻路");
                 return;
             } else {
                 this.retryTimes++;

@@ -62,12 +62,17 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
 		return new Item[]{Item.get(Item.ROTTEN_FLESH)};
 	}
 
+	public double getAttackDistance() {
+		return 1;
+	}
+
 	@Override
 	public boolean entityBaseTick(int tickDiff){
         if (System.currentTimeMillis() > this.attackCoolUntil && this.hasSetTarget() && this.getRealTarget() instanceof Player) {
             Player player = (Player) this.getRealTarget();
-            if (player != null && this.distance(player) <= 1) {
-                player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageByEntityEvent.CAUSE_ENTITY_ATTACK, 2));
+            if (player != null && player.noDamageTicks <= 0 && this.distance(player) <= this.getAttackDistance()) {
+                player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageByEntityEvent.CAUSE_ENTITY_ATTACK, this.getDamage()));
+				player.noDamageTicks = 10;
                 AnimatePacket pk = new AnimatePacket();
                 pk.eid = this.getId();
                 pk.action = 3;

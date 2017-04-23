@@ -20,6 +20,7 @@ public abstract class RouteFinder{
 	protected MovingEntity entity = null;
 
 	protected boolean forceStop = false;
+	public long stopRouteFindUntil = System.currentTimeMillis();
 
 	public RouteFinder(MovingEntity entity){
 		if(entity == null) throw new IllegalArgumentException("Entity cannot be null");

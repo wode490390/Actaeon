@@ -31,6 +31,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 
 	@Override
 	public boolean search(){
+		this.stopRouteFindUntil = System.currentTimeMillis() + 250;
 		this.succeed = false;
 		this.searching = true;
 

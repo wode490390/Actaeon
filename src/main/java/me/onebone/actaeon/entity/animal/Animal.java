@@ -1,11 +1,13 @@
 package me.onebone.actaeon.entity.animal;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
+import cn.nukkit.network.protocol.UpdateAttributesPacket;
 import me.onebone.actaeon.entity.MovingEntity;
 
 abstract public class Animal extends MovingEntity implements EntityAgeable{
@@ -32,6 +34,13 @@ abstract public class Animal extends MovingEntity implements EntityAgeable{
 		pk.speedZ = (float) this.motionZ;
 		pk.metadata = this.dataProperties;
 		player.dataPacket(pk);
+
+		UpdateAttributesPacket pk0 = new UpdateAttributesPacket();
+		pk0.entityId = this.getId();
+		pk0.entries = new Attribute[]{
+				Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(this.getMaxHealth()).setValue(this.getHealth()),
+		};
+		player.dataPacket(pk0);
 
 		super.spawnTo(player);
 	}
