@@ -98,6 +98,10 @@ public abstract class RouteFinder{
 
 	public void forceStop() {
 		this.forceStop = true;
+		if (!this.isSearching()) {
+			this.forceStop = false;
+			this.resetNodes();
+		}
 	}
 
 	protected void addNode(Node node){

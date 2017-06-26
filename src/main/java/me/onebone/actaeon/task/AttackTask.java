@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.network.protocol.AnimatePacket;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import me.onebone.actaeon.entity.MovingEntity;
 
@@ -48,9 +49,10 @@ public class AttackTask extends MovingEntityTask {
                 this.target.noDamageTicks = 10;
             }
         }
+
         EntityEventPacket pk = new EntityEventPacket();
         pk.eid = this.entity.getId();
-        pk.event = 25;
+        pk.event = 4;
         Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
         this.entity.updateBotTask(null);
     }

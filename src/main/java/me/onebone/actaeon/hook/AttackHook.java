@@ -29,6 +29,7 @@ public class AttackHook extends MovingEntityHook {
     public AttackHook(MovingEntity bot, double attackDistance, float damage, long coolDown, int effectual, double viewAngle) {
         super(bot);
         this.attackDistance = attackDistance;
+        this.damage = damage;
         this.coolDown = coolDown;
         this.effectual = effectual;
         this.viewAngle = viewAngle;

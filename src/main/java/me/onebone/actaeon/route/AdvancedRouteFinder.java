@@ -53,6 +53,11 @@ public class AdvancedRouteFinder extends RouteFinder{
 
 		int limit = 500;
 		while(!open.isEmpty() && limit-- > 0){
+			if (this.forceStop) {
+				this.resetNodes();
+				this.forceStop = false;
+				return this.succeed = this.searching = false;
+			}
 			Node node = null;
 
 			double f = Double.MAX_VALUE;
@@ -127,6 +132,12 @@ public class AdvancedRouteFinder extends RouteFinder{
 				neighbor.setParent(node);
 				neighbor.g = tentative_gScore;
 				neighbor.f = neighbor.g + this.heuristic(neighbor.getVector3(), endNode.getVector3());
+
+				if (this.forceStop) {
+					this.resetNodes();
+					this.forceStop = false;
+					return this.succeed = this.searching = false;
+				}
 			}
 		}
 
@@ -175,7 +186,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 		return neighbors;
 	}
 
-	private Block getHighestUnder(double x, double dy, double z){
+	public Block getHighestUnder(double x, double dy, double z){
 		for(int y=(int)dy;y >= 0; y--){
 			Block block = level.getBlock(new Vector3(x, y, z));
 
@@ -217,14 +228,18 @@ public class AdvancedRouteFinder extends RouteFinder{
 		super.resetNodes();
 
 		this.grid.clear();
-		Block block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
-		if(block == null){
-			block = new BlockAir();
-			block.position(new Position(this.destination.x, 0, this.destination.z));
-		}
 
-		this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
+		if (this.destination != null) {
+			Block block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
+			if(block == null){
+				block = new BlockAir();
+				block.position(new Position(this.destination.x, 0, this.destination.z));
+			}
+
+			this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
+		}
 	}
+
 
 	@Override
 	public boolean research(){

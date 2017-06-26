@@ -80,16 +80,6 @@ abstract public class MovingEntity extends EntityCreature{
 			return false;
 		}
 
-		if (this.isSprinting()) {
-			this.movementSpeed = 0.35f;
-		} else if (this.isSneaking()) {
-			this.movementSpeed = 0.08f;
-		} else {
-			this.movementSpeed = 0.27f;
-		}
-
-		if (this.isInsideOfWater()) this.movementSpeed *= 0.2;
-
 		new ArrayList<>(this.hooks.values()).forEach(hook -> hook.onUpdate(Server.getInstance().getTick()));
 		if (this.task != null) this.task.onUpdate(Server.getInstance().getTick());
 
@@ -173,7 +163,7 @@ abstract public class MovingEntity extends EntityCreature{
 	}
 
 	public double getRange(){
-		return 30.0;
+		return 100.0;
 	}
 
 	public void setTarget(Vector3 vec, String identifier){
