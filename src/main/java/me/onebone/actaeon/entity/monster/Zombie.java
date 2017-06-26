@@ -1,22 +1,13 @@
 package me.onebone.actaeon.entity.monster;
 
-import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.entity.EntityAgeable;
-import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.AnimatePacket;
-import cn.nukkit.network.protocol.EntityEventPacket;
-import cn.nukkit.network.protocol.InteractPacket;
-import cn.nukkit.network.protocol.PlayerActionPacket;
 import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
-import me.onebone.actaeon.entity.animal.Animal;
+import me.onebone.actaeon.hook.AttackHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
-import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 public class Zombie extends Monster implements EntityAgeable, Fallable, Climbable{
 	public static final int NETWORK_ID = 32;
@@ -24,6 +15,7 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
 	public Zombie(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
 		this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 20000));
+		this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this.getDamage(), 1000, 10, 180));
 	}
 
 	@Override
@@ -64,25 +56,6 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
 
 	public double getAttackDistance() {
 		return 1;
-	}
-
-	@Override
-	public boolean entityBaseTick(int tickDiff){
-        if (System.currentTimeMillis() > this.attackCoolUntil && this.hasSetTarget() && this.getRealTarget() instanceof Player) {
-            Player player = (Player) this.getRealTarget();
-            if (player != null && player.noDamageTicks <= 0 && this.distance(player) <= this.getAttackDistance()) {
-                player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageByEntityEvent.CAUSE_ENTITY_ATTACK, this.getDamage()));
-				player.noDamageTicks = 10;
-                AnimatePacket pk = new AnimatePacket();
-                pk.eid = this.getId();
-                pk.action = 3;
-                for (Player p: this.getLevel().getPlayers().values()) {
-                    p.dataPacket(pk);
-                }
-                this.attackCoolUntil = System.currentTimeMillis() + 1000;
-            }
-        }
-		return super.entityBaseTick(tickDiff);
 	}
 
 	@Override

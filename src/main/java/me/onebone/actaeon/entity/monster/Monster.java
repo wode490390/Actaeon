@@ -16,8 +16,6 @@ abstract public class Monster extends MovingEntity implements EntityAgeable{
 		super(chunk, nbt);
 	}
 
-    protected long attackCoolUntil = System.currentTimeMillis();
-
 	public float getDamage() {
 		return 2;
 	}

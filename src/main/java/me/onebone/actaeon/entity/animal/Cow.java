@@ -57,7 +57,7 @@ public class Cow extends Animal implements EntityAgeable{
 		Item leather = Item.get(Item.LEATHER, 0, random.nextInt(3));
 		Item meat = Item.get(Item.RAW_BEEF, 0, random.nextInt(3) + 1);
 		EntityDamageEvent cause = this.getLastDamageCause();
-		if (cause.getCause() == EntityDamageEvent.CAUSE_FIRE) {
+		if (cause.getCause() == EntityDamageEvent.DamageCause.FIRE) {
 			meat = Item.get(Item.STEAK, 0, random.nextInt(3) + 1);
 		}
 		return new Item[]{leather, meat};
