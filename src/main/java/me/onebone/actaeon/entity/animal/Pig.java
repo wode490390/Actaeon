@@ -4,6 +4,7 @@ import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
+import me.onebone.actaeon.hook.WanderHook;
 import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 import java.util.Random;
@@ -13,7 +14,8 @@ public class Pig extends Animal implements EntityAgeable {
 
     public Pig(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+        this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 10));
+        this.addHook("wander", new WanderHook(this));
     }
 
     @Override

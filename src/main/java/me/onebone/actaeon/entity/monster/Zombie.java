@@ -7,6 +7,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.hook.AttackHook;
+import me.onebone.actaeon.hook.WanderHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
 public class Zombie extends Monster implements EntityAgeable, Fallable, Climbable {
@@ -14,8 +15,9 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
 
     public Zombie(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 20000));
+        this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 16));
         this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this.getDamage(), 1000, 10, 180));
+        this.addHook("wander", new WanderHook(this));
     }
 
     @Override

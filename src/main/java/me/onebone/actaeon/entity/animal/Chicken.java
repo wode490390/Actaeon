@@ -5,6 +5,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.entity.Fallable;
+import me.onebone.actaeon.hook.WanderHook;
 import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
 
 public class Chicken extends Animal implements EntityAgeable, Fallable {
@@ -12,7 +13,8 @@ public class Chicken extends Animal implements EntityAgeable, Fallable {
 
     public Chicken(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+        this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 10));
+        this.addHook("wander", new WanderHook(this));
     }
 
     @Override

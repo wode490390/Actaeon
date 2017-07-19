@@ -29,4 +29,7 @@ public abstract class MovingEntityHook {
     public void onDamage(Entity damager) {
     }
 
+    public boolean shouldExecute() {
+        return true;
+    }
 }
