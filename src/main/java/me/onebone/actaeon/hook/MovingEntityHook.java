@@ -23,8 +23,10 @@ public abstract class MovingEntityHook {
         return entity;
     }
 
-    public void onUpdate(int tick) {}
+    public void onUpdate(int tick) {
+    }
 
-    public void onDamage(Entity damager) {}
+    public void onDamage(Entity damager) {
+    }
 
 }
