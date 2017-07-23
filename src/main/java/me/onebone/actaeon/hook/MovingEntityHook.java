@@ -15,6 +15,8 @@ public abstract class MovingEntityHook {
 
     protected final MovingEntity entity;
 
+    public boolean executing = false;
+
     public MovingEntityHook(MovingEntity entity) {
         this.entity = entity;
     }

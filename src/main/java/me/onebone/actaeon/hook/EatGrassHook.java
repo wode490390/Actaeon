@@ -21,28 +21,27 @@ public class EatGrassHook extends MovingEntityHook {
     }
 
     @Override
-    public boolean shouldExecute() {
-        if (this.entity.level.rand.nextInt(((Animal) this.entity).isBaby() ? 50 : 1000) != 0) {
-            return false;
-        } else {
-            Block block = this.entity.getLevelBlock();
+    public void onUpdate(int tick) {
+        if (!this.executing) {
+            if (this.entity.level.rand.nextInt(((Animal) this.entity).isBaby() ? 50 : 1000) != 0) {
+                return;
+            } else {
+                Block block = this.entity.getLevelBlock();
 
-            if (block instanceof BlockTallGrass || block.down() instanceof BlockGrass) {
-                this.timer = 40;
+                if (block instanceof BlockTallGrass || block.down() instanceof BlockGrass) {
+                    this.timer = 40;
 
-                EntityEventPacket pk = new EntityEventPacket();
-                pk.eid = this.getEntity().getId();
-                pk.event = EntityEventPacket.EAT_GRASS_ANIMATION;
-                Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
-                return true;
+                    EntityEventPacket pk = new EntityEventPacket();
+                    pk.eid = this.getEntity().getId();
+                    pk.event = EntityEventPacket.EAT_GRASS_ANIMATION;
+                    Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
+                    this.executing = true;
+                }
             }
+
+            return;
         }
 
-        return false;
-    }
-
-    @Override
-    public void onUpdate(int tick) {
         this.timer = Math.max(0, this.timer - 1);
 
         if (this.timer == 4) {
@@ -66,6 +65,10 @@ public class EatGrassHook extends MovingEntityHook {
                     //TODO: grow bonus
                 }
             }
+        }
+
+        if (timer == 0) {
+            this.executing = false;
         }
     }
 }
