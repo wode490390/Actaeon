@@ -81,6 +81,8 @@ abstract public class MovingEntity extends EntityCreature {
         }
 
         new ArrayList<>(this.hooks.values()).forEach(hook -> {
+
+
             if (hook.shouldExecute()) {
                 hook.onUpdate(Server.getInstance().getTick());
             }

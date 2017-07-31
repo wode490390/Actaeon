@@ -23,7 +23,7 @@ public class WanderHook extends MovingEntityHook {
 
     @Override
     public void onUpdate(int tick) {
-        if (this.entity.level.rand.nextInt(this.chance) != 0) {
+        if (!this.entity.routeLeading || this.entity.getHate() != null || this.entity.level.rand.nextInt(this.chance) != 0) {
             return;
         }
 
