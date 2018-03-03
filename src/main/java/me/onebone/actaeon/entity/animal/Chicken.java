@@ -1,21 +1,24 @@
 package me.onebone.actaeon.entity.animal;
 
-import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
+import me.onebone.actaeon.Utils.Utils;
 import me.onebone.actaeon.entity.Fallable;
-import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
+import me.onebone.actaeon.hook.AnimalGrowHook;
+import me.onebone.actaeon.hook.AnimalHook;
+import me.onebone.actaeon.hook.ChickenEggHook;
 
 public class Chicken extends Animal implements EntityAgeable, Fallable{
 	public static final int NETWORK_ID = 10;
+	private boolean isBaby = false;
 
 	public Chicken(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
-		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+		this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT_SEEDS), 10));
+		this.addHook("egg", new ChickenEggHook(this));
 	}
 
 	@Override
@@ -46,7 +49,18 @@ public class Chicken extends Animal implements EntityAgeable, Fallable{
 
 	@Override
 	public Item[] getDrops(){
-		return new Item[]{Item.get(Item.RAW_CHICKEN), Item.get(Item.FEATHER)};
+		if(!isBaby()) {
+			Item chicken;
+			if (this.getLastDamageCause().getCause().equals(EntityDamageEvent.DamageCause.FIRE)) {
+				chicken = Item.get(Item.COOKED_CHICKEN);
+			} else {
+				chicken = Item.get(Item.RAW_CHICKEN);
+			}
+			this.getLevel().dropExpOrb(this,Utils.rand(1,4));
+			return new Item[]{chicken, Item.get(Item.FEATHER, 0, Utils.rand(0, 3))};
+		} else {
+			return new Item[0];
+		}
 	}
 
 	@Override
@@ -63,10 +77,16 @@ public class Chicken extends Animal implements EntityAgeable, Fallable{
 	protected void initEntity(){
 		super.initEntity();
 		setMaxHealth(4);
+		isBaby = (Utils.rand(1,11) == 1);
+		setBaby(isBaby);
+		if(isBaby){
+			this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20*60*10,20*60*20)));
+		}
 	}
 
 	@Override
 	public boolean isBaby(){
-		return false;
+		return isBaby;
 	}
+
 }

@@ -4,14 +4,17 @@ import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
+import me.onebone.actaeon.Utils.Utils;
+import me.onebone.actaeon.hook.AnimalGrowHook;
+import me.onebone.actaeon.hook.AnimalHook;
 
 public class Pig extends Animal implements EntityAgeable{
 	public static final int NETWORK_ID = 12;
+	private boolean isBaby = false;
 
 	public Pig(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
-		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+		this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.CARROTS), 10));
 	}
 
 	@Override
@@ -59,10 +62,15 @@ public class Pig extends Animal implements EntityAgeable{
 	protected void initEntity() {
 		super.initEntity();
 		setMaxHealth(10);
+		isBaby = Utils.rand(1,11) == 1;
+		setBaby(isBaby);
+		if(isBaby){
+			this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20*60*10,20*60*20)));
+		}
 	}
 
 	@Override
 	public boolean isBaby(){
-		return false;
+		return isBaby;
 	}
 }

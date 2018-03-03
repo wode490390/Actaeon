@@ -74,7 +74,7 @@ public class AttackHook extends MovingEntityHook {
                         this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
                     }
                     this.lastAttack = System.currentTimeMillis();
-                    if (this.jump && new Random().nextBoolean()) this.entity.jump();
+                    //if (this.jump && new Random().nextBoolean()) this.entity.jump();
                 }
             }
         }

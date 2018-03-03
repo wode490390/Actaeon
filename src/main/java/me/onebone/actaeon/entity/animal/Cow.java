@@ -1,23 +1,24 @@
 package me.onebone.actaeon.entity.animal;
 
 import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
+import me.onebone.actaeon.Utils.Utils;
+import me.onebone.actaeon.hook.AnimalGrowHook;
+import me.onebone.actaeon.hook.AnimalHook;
 
 import java.util.Random;
 
 public class Cow extends Animal implements EntityAgeable{
 	public static final int NETWORK_ID = 11;
+	private boolean isBaby = false;
 
 	public Cow(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
-		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+		this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT), 10));
 	}
 
 	@Override
@@ -48,19 +49,24 @@ public class Cow extends Animal implements EntityAgeable{
 
 	@Override
 	public boolean isBaby(){
-		return false;
+		return isBaby;
 	}
 
 	@Override
 	public Item[] getDrops(){
-		Random random = new Random();
-		Item leather = Item.get(Item.LEATHER, 0, random.nextInt(3));
-		Item meat = Item.get(Item.RAW_BEEF, 0, random.nextInt(3) + 1);
-		EntityDamageEvent cause = this.getLastDamageCause();
-		if (cause.getCause() == EntityDamageEvent.DamageCause.FIRE) {
-			meat = Item.get(Item.STEAK, 0, random.nextInt(3) + 1);
+		if(!isBaby()) {
+			Random random = new Random();
+			Item leather = Item.get(Item.LEATHER, 0, random.nextInt(2));
+			Item meat = Item.get(Item.RAW_BEEF, 0, random.nextInt(3) + 1);
+			EntityDamageEvent cause = this.getLastDamageCause();
+			if (cause.getCause() == EntityDamageEvent.DamageCause.FIRE) {
+				meat = Item.get(Item.STEAK, 0, random.nextInt(3) + 1);
+			}
+			this.getLevel().dropExpOrb(this,random.nextInt(3) + 1);
+			return new Item[]{leather, meat};
+		}else{
+			return new Item[0];
 		}
-		return new Item[]{leather, meat};
 	}
 
 	@Override
@@ -70,8 +76,23 @@ public class Cow extends Animal implements EntityAgeable{
 	}
 
 	@Override
+	public boolean onInteract(Player player, Item item) {
+		if(item.getId() == Item.BUCKET) {
+			player.getInventory().addItem(Item.get(335,0,1));
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	protected void initEntity(){
 		super.initEntity();
 		setMaxHealth(10);
+		isBaby = Utils.rand(1,10) == 1;
+		setBaby(isBaby);
+		if(isBaby){
+			this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20*60*10,20*60*20)));
+		}
 	}
+
 }

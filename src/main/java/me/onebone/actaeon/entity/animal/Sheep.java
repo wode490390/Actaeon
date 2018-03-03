@@ -1,12 +1,9 @@
 package me.onebone.actaeon.entity.animal;
 
-import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.target.AreaPlayerHoldTargetFinder;
+import me.onebone.actaeon.hook.AnimalHook;
 
 import java.util.Random;
 
@@ -15,7 +12,7 @@ public class Sheep extends Animal{
 
 	public Sheep(FullChunk chunk, CompoundTag nbt){
 		super(chunk, nbt);
-		this.setTargetFinder(new AreaPlayerHoldTargetFinder(this, 500, Item.get(Item.WHEAT), 100));
+		this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT), 10));
 	}
 
 	@Override

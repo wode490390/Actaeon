@@ -59,6 +59,6 @@ public class Actaeon extends PluginBase implements Listener{
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Block block = event.getBlock();
-		event.getPlayer().sendMessage("XYZ=" + block.getX() + "," + block.getY() + "," + block.getZ() + " ID=" + block.getId() + " META=" + block.getDamage());
+		//event.getPlayer().sendMessage("XYZ=" + block.getX() + "," + block.getY() + "," + block.getZ() + " ID=" + block.getId() + " META=" + block.getDamage());
 	}
 }
