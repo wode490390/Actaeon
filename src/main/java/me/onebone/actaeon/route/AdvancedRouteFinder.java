@@ -25,6 +25,7 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     @Override
     public boolean search() {
+        //ActaeonTimings.routeFindTiming.startTiming();
         this.stopRouteFindUntil = System.currentTimeMillis() + 250;
         this.succeed = false;
         this.searching = true;
@@ -47,7 +48,7 @@ public class AdvancedRouteFinder extends RouteFinder {
 
         int limit = 500;
         while (!open.isEmpty() && limit-- > 0) {
-            if (this.forceStop) {
+            if (this.forceStop || System.currentTimeMillis() > this.stopRouteFindUntil) {
                 this.resetNodes();
                 this.forceStop = false;
                 return this.succeed = this.searching = false;
@@ -136,6 +137,7 @@ public class AdvancedRouteFinder extends RouteFinder {
             }
         }
 
+        //ActaeonTimings.routeFindTiming.stopTiming();
         return this.succeed = this.searching = false;
     }
 
@@ -256,12 +258,12 @@ public class AdvancedRouteFinder extends RouteFinder {
     private class Grid {
         private Map<Double, Map<Double, Map<Double, Node>>> grid = new HashMap<>();
 
-        public void clear() {
+        synchronized void clear() {
             grid.clear();
         }
 
-        public void putNode(Vector3 vec, Node node) {
-            vec = vec.floor();
+        synchronized void putNode(Vector3 vec, Node node) {
+            vec = vec.floor().clone();
 
             if (!grid.containsKey(vec.x)) {
                 grid.put(vec.x, new HashMap<>());
@@ -274,8 +276,8 @@ public class AdvancedRouteFinder extends RouteFinder {
             grid.get(vec.x).get(vec.y).put(vec.z, node);
         }
 
-        public Node getNode(Vector3 vec) {
-            vec = vec.floor();
+        synchronized Node getNode(Vector3 vec) {
+            vec = vec.floor().clone();
 
             if (!grid.containsKey(vec.x) || !grid.get(vec.x).containsKey(vec.y) || !grid.get(vec.x).get(vec.y).containsKey(vec.z)) {
                 Node node = new Node(vec.x, vec.y, vec.z);

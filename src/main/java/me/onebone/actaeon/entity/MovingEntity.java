@@ -102,6 +102,10 @@ abstract public class MovingEntity extends EntityCreature {
 
         if (this.targetFinder != null) this.targetFinder.onUpdate();
 
+        if (this.route.isSearching() && System.currentTimeMillis() - this.route.stopRouteFindUntil > 1000) {
+            this.route.forceStop();
+        }
+
         if (this.routeLeading && this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)) { // 대상이 이동함
             Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
 
@@ -206,7 +210,7 @@ abstract public class MovingEntity extends EntityCreature {
      * Entity will try to move to position where target exists
      */
     public boolean hasFollowingTarget() {
-        return this.route.getDestination() != null && this.target != null && this.distance(this.target) < this.getRange();
+        return this.route.getDestination() != null && this.target != null && this.distanceSquared(this.target) < this.getRange();
     }
 
     /**
@@ -215,7 +219,7 @@ abstract public class MovingEntity extends EntityCreature {
      * If following distance of target is too far to follow or cannot reach, set target will be the next following target
      */
     public boolean hasSetTarget() {
-        return this.target != null && this.distance(this.target) < this.getRange();
+        return this.target != null && this.distanceSquared(this.target) < this.getRange();
     }
 
     @Override

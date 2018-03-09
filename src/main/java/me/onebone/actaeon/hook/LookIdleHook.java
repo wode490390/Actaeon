@@ -7,7 +7,7 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public class LookIdleHook extends MovingEntityHook {
 
-    public LookIdleHook(MovingEntity entity){
+    public LookIdleHook(MovingEntity entity) {
         super(entity);
     }
 

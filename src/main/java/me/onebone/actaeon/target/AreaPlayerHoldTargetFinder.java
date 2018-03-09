@@ -21,7 +21,7 @@ public class AreaPlayerHoldTargetFinder extends TargetFinder {
 
         for (Player player : this.getEntity().getLevel().getPlayers().values()) {
             if (this.getEntity().distanceSquared(player) < nearest) {
-                if (player.getInventory().getItemInHand().equals(this.item, false, false)) {
+                if (player.getInventory().getItemInHand().equals(this.item, true, false)) {
                     near = player;
                     nearest = this.getEntity().distance(player);
                 }

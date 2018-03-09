@@ -20,6 +20,7 @@ public abstract class RouteFinder {
 
     protected boolean forceStop = false;
     public long stopRouteFindUntil = System.currentTimeMillis();
+    public volatile Thread thread;
 
     public RouteFinder(MovingEntity entity) {
         if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
@@ -97,6 +98,12 @@ public abstract class RouteFinder {
 
     public void forceStop() {
         this.forceStop = true;
+        /*if(this.thread != null) {
+            this.thread.interrupt();
+            //this.thread.stop();
+            this.thread = null;
+        }*/
+
         if (!this.isSearching()) {
             this.forceStop = false;
             this.resetNodes();

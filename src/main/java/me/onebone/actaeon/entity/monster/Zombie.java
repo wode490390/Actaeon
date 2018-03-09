@@ -1,5 +1,6 @@
 package me.onebone.actaeon.entity.monster;
 
+import cn.nukkit.Player;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
@@ -15,7 +16,7 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
 
     public Zombie(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.setTargetFinder(new AreaHaterTargetFinder(this, 500, 16));
+        this.setTargetFinder(new AreaHaterTargetFinder(this, Player.class, 500, 16));
         this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this.getDamage(), 1000, 10, 180));
         this.addHook("wander", new WanderHook(this));
     }

@@ -1,16 +1,19 @@
 package me.onebone.actaeon.target;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
 import me.onebone.actaeon.entity.MovingEntity;
 
 public class AreaHaterTargetFinder extends TargetFinder {
 
     private int radius;
     private boolean first = true;
+    private Class<? extends Entity> target;
 
-    public AreaHaterTargetFinder(MovingEntity entity, long interval, int radius) {
+    public AreaHaterTargetFinder(MovingEntity entity, Class<? extends Entity> target, long interval, int radius) {
         super(entity, interval);
         this.radius = radius;
+        this.target = target;
     }
 
     protected void find() {

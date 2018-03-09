@@ -16,7 +16,7 @@ public class EatGrassHook extends MovingEntityHook {
 
     private int timer = 40;
 
-    public EatGrassHook(Animal entity){
+    public EatGrassHook(Animal entity) {
         super(entity);
     }
 
@@ -38,6 +38,7 @@ public class EatGrassHook extends MovingEntityHook {
                     this.executing = true;
                     this.entity.routeLeading = false;
                     this.entity.getRoute().forceStop();
+                    this.entity.getRoute().arrived();
                 }
             }
 
@@ -51,7 +52,7 @@ public class EatGrassHook extends MovingEntityHook {
 
             if (block instanceof BlockTallGrass) {
                 //if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                    this.entity.level.useBreakOn(block);
+                this.entity.level.useBreakOn(block);
                 //}
 
                 //TODO: grow bonus
@@ -60,8 +61,8 @@ public class EatGrassHook extends MovingEntityHook {
 
                 if (block.getId() == Block.GRASS) {
                     //if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                        this.entity.level.addParticle(new DestroyBlockParticle(block, block));
-                        this.entity.level.setBlock(block, new BlockDirt(), true, false);
+                    this.entity.level.addParticle(new DestroyBlockParticle(block, block));
+                    this.entity.level.setBlock(block, new BlockDirt(), true, false);
                     //}
 
                     //TODO: grow bonus

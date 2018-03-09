@@ -23,21 +23,28 @@ public class RouteFinderSearchAsyncTask extends AsyncTask {
     private Vector3 start = null;
     private Vector3 dest = null;
     private AxisAlignedBB bb = null;
+    public Thread thread;
 
-    public RouteFinderSearchAsyncTask(RouteFinder route) {
+    /*public RouteFinderSearchAsyncTask(RouteFinder route) {
         this(route, null, null, null, null);
-    }
+    }*/
+
+    public long started;
 
     public RouteFinderSearchAsyncTask(RouteFinder route, Level level, Vector3 start, Vector3 dest, AxisAlignedBB bb) {
         this.route = route;
         this.level = level;
-        this.start = start;
-        this.dest = dest;
-        this.bb = bb;
+        this.start = start.clone();
+        this.dest = dest.clone();
+        this.bb = bb.clone();
     }
 
     @Override
     public void onRun() {
+        started = System.currentTimeMillis();
+        TaskWatchDog.tasks.add(this);
+        thread = Thread.currentThread();
+
         while (this.retryTimes < 100) {
             if (!this.route.isSearching()) {
                 if (this.level != null) this.route.setPositions(this.level, this.start, this.dest, this.bb);
