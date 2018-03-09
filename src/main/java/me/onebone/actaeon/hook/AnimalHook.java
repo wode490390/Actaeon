@@ -19,7 +19,7 @@ import me.onebone.actaeon.target.StrollingTargetFinder;
  * ||     |||      |||||||     |||||  |||       |||| ||||||||      |||||    |
  * ||||
  */
-public class AnimalHook extends MovingEntityHook{
+public class AnimalHook extends MovingEntityHook {
 
     private int radius;
     private long interval;
@@ -35,7 +35,7 @@ public class AnimalHook extends MovingEntityHook{
 
     @Override
     public void onUpdate(int tick) {
-        if(tick % 20 == 0) {
+        if (tick % 20 == 0) {
             Player near = null;
             double nearest = this.radius * this.radius;
 

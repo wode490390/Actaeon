@@ -2,7 +2,6 @@ package me.onebone.actaeon.task;
 
 import cn.nukkit.item.Item;
 import cn.nukkit.math.Vector3;
-import me.onebone.actaeon.Utils.Utils;
 import me.onebone.actaeon.entity.MovingEntity;
 
 /**
@@ -21,13 +20,13 @@ import me.onebone.actaeon.entity.MovingEntity;
 public class ChickenEggTask extends MovingEntityTask {
 
 
-    public ChickenEggTask(MovingEntity movingEntity){
+    public ChickenEggTask(MovingEntity movingEntity) {
         super(movingEntity);
     }
 
     @Override
-    public void onUpdate(int i){
-        entity.getLevel().dropItem(entity,Item.get(Item.EGG,0,1),new Vector3(0,0,0));
+    public void onUpdate(int i) {
+        entity.getLevel().dropItem(entity, Item.get(Item.EGG, 0, 1), new Vector3(0, 0, 0));
         this.entity.updateBotTask(null);
     }
 

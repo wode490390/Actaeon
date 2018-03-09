@@ -46,7 +46,7 @@ public class StrollingTargetFinder extends TargetFinder {
             double z = this.radius * Math.sin(Math.toRadians(r));
             double y = base.getY();
             if (this.findHighest >= 0 && this.getEntity().getRoute() instanceof AdvancedRouteFinder) {
-                Vector3 highest = ((AdvancedRouteFinder)this.getEntity().getRoute()).getHighestUnder(x, y + 2, z, this.findHighest == 0 ? (int)y + 2 : this.findHighest);
+                Vector3 highest = ((AdvancedRouteFinder) this.getEntity().getRoute()).getHighestUnder(x, y + 2, z, this.findHighest == 0 ? (int) y + 2 : this.findHighest);
                 if (highest == null)
                     return;  //不可走, 重新尝试选点
                 y = highest.getY() + 1;

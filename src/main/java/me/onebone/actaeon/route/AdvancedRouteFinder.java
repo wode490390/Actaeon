@@ -17,9 +17,10 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     private Grid grid = new Grid();
 
-	public AdvancedRouteFinder(MovingEntity entity){
-		super(entity);
-	this.setLevel(entity.getLevel());}
+    public AdvancedRouteFinder(MovingEntity entity) {
+        super(entity);
+        this.setLevel(entity.getLevel());
+    }
 
     @Override
     public boolean search() {
@@ -181,26 +182,27 @@ public class AdvancedRouteFinder extends RouteFinder {
         return neighbors;
     }
 
-	public Vector3 getHighestUnder(double x, double dy, double z){
-		return this.getHighestUnder(x, dy, z,(int)dy);
-			}
+    public Vector3 getHighestUnder(double x, double dy, double z) {
+        return this.getHighestUnder(x, dy, z, (int) dy);
+    }
 
-			public Vector3 getHighestUnder(double x, double dy, double z, int limit){
-		int minY = (int)dy - limit < 0 ? 0 : (int)dy - limit;
-		for(int y = (int)dy; y >= minY; y--){
-			int blockId = level.getBlockIdAt((int)x, y, (int)z);if(!canWalkOn(blockId)) return new Vector3(x, y, z);
-			if(!Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
-		}
-		return null;
-	}
+    public Vector3 getHighestUnder(double x, double dy, double z, int limit) {
+        int minY = (int) dy - limit < 0 ? 0 : (int) dy - limit;
+        for (int y = (int) dy; y >= minY; y--) {
+            int blockId = level.getBlockIdAt((int) x, y, (int) z);
+            if (!canWalkOn(blockId)) return new Vector3(x, y, z);
+            if (!Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
+        }
+        return null;
+    }
 
-	public double isWalkableAt(Vector3 vec){
-		Vector3 block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
-		if(block == null) return -256;
+    public double isWalkableAt(Vector3 vec) {
+        Vector3 block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
+        if (block == null) return -256;
 
         double diff = (block.y - vec.y) + 1;
 
-        if ((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlockIdAt((int)block.x, (int)block.y, (int)block.z))) {
+        if ((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlockIdAt((int) block.x, (int) block.y, (int) block.z))) {
             return diff;
         }
         return -256;
@@ -227,20 +229,20 @@ public class AdvancedRouteFinder extends RouteFinder {
 
         this.grid.clear();
 
-		if (this.destination != null) {
-			Vector3 block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
-			if(block == null){
-				block = new Vector3(this.destination.x, 0, this.destination.z);
+        if (this.destination != null) {
+            Vector3 block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
+            if (block == null) {
+                block = new Vector3(this.destination.x, 0, this.destination.z);
 
-}
-			this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
-		}
-	}
+            }
+            this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
+        }
+    }
 
 
-	@Override
-	public boolean research(){
-		this.resetNodes();
+    @Override
+    public boolean research() {
+        this.resetNodes();
 
         return this.search();
     }
