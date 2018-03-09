@@ -72,14 +72,17 @@ public class AttackHook extends MovingEntityHook {
 
     @Override
     public void onUpdate(int tick) {
-        Entity hate = this.entity.getHate();
-
-        if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
-            if (this.entity.getTask() == null) {
-                this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
+        if (this.entity.getHate() != null) {
+            Entity hate = this.entity.getHate();
+            if (this.entity.distance(hate) <= this.attackDistance) {
+                if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
+                    if (this.entity.getTask() == null) {
+                        this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
+                    }
+                    this.lastAttack = System.currentTimeMillis();
+                    //if (this.jump && new Random().nextBoolean()) this.entity.jump();
+                }
             }
-            this.lastAttack = System.currentTimeMillis();
-            if (this.jump && new Random().nextBoolean()) this.entity.jump();
         }
     }
 }

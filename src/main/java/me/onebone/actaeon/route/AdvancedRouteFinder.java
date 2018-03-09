@@ -1,8 +1,6 @@
 package me.onebone.actaeon.route;
 
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockAir;
-import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
@@ -19,9 +17,9 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     private Grid grid = new Grid();
 
-    public AdvancedRouteFinder(MovingEntity entity) {
-        super(entity);
-    }
+	public AdvancedRouteFinder(MovingEntity entity){
+		super(entity);
+	this.setLevel(entity.getLevel());}
 
     @Override
     public boolean search() {
@@ -80,13 +78,13 @@ public class AdvancedRouteFinder extends RouteFinder {
                         if (iterator.hasNext()) {  //无法直接到达
                             //level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
                             nodes.add(last);
-                            //level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+                            //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3).encode()[0]);
                             nodes.add(node);
                         } else {
-                            //level.addParticle(new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()));
+                            //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()).encode()[0]);
                         }
                     } else {  //Y变了直接放入list
-                        //level.addParticle(new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3));
+                        //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3).encode()[0]);
                         nodes.add(node);
                     }
                     last = node;
@@ -99,12 +97,12 @@ public class AdvancedRouteFinder extends RouteFinder {
 
                 Collections.reverse(nodes);
 
-                nodes.remove(nodes.size() - 1);
+                nodes.remove(nodes.size() - 1);  //移除原来最终坐标（为整方块中心）
                 Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
                 if (highestUnder != null) {
                     Node realDestinationNode = new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ()));
                     realDestinationNode.setParent(node);
-                    nodes.add(realDestinationNode);
+                    nodes.add(realDestinationNode);  //添加目的地最终坐标
                 }
 
                 nodes.forEach(this::addNode);
@@ -183,30 +181,33 @@ public class AdvancedRouteFinder extends RouteFinder {
         return neighbors;
     }
 
-    public Block getHighestUnder(double x, double dy, double z) {
-        for (int y = (int) dy; y >= 0; y--) {
-            Block block = level.getBlock(new Vector3(x, y, z));
+	public Vector3 getHighestUnder(double x, double dy, double z){
+		return this.getHighestUnder(x, dy, z,(int)dy);
+			}
 
-            if (!canWalkOn(block)) return block;
-            if (!block.canPassThrough()) return block;
-        }
-        return null;
-    }
+			public Vector3 getHighestUnder(double x, double dy, double z, int limit){
+		int minY = (int)dy - limit < 0 ? 0 : (int)dy - limit;
+		for(int y = (int)dy; y >= minY; y--){
+			int blockId = level.getBlockIdAt((int)x, y, (int)z);if(!canWalkOn(blockId)) return new Vector3(x, y, z);
+			if(!Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
+		}
+		return null;
+	}
 
-    public double isWalkableAt(Vector3 vec) {
-        Block block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
-        if (block == null) return -256;
+	public double isWalkableAt(Vector3 vec){
+		Vector3 block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
+		if(block == null) return -256;
 
         double diff = (block.y - vec.y) + 1;
 
-        if ((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(block)) {
+        if ((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlockIdAt((int)block.x, (int)block.y, (int)block.z))) {
             return diff;
         }
         return -256;
     }
 
-    private boolean canWalkOn(Block block) {
-        return !(block.getId() == Block.LAVA || block.getId() == Block.STILL_LAVA);
+    private boolean canWalkOn(int blockId) {
+        return !(blockId == Block.LAVA || blockId == Block.STILL_LAVA);
     }
 
     private double heuristic(Vector3 one, Vector3 two) {
@@ -226,21 +227,20 @@ public class AdvancedRouteFinder extends RouteFinder {
 
         this.grid.clear();
 
-        if (this.destination != null) {
-            Block block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
-            if (block == null) {
-                block = new BlockAir();
-                block.position(new Position(this.destination.x, 0, this.destination.z));
-            }
+		if (this.destination != null) {
+			Vector3 block = this.getHighestUnder(this.destination.x, this.destination.y, this.destination.z);
+			if(block == null){
+				block = new Vector3(this.destination.x, 0, this.destination.z);
 
-            this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
-        }
-    }
+}
+			this.realDestination = new Vector3(this.destination.x, block.y + 1, this.destination.z).floor();
+		}
+	}
 
 
-    @Override
-    public boolean research() {
-        this.resetNodes();
+	@Override
+	public boolean research(){
+		this.resetNodes();
 
         return this.search();
     }

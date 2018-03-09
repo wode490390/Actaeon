@@ -4,6 +4,7 @@ import cn.nukkit.Server;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -41,18 +42,22 @@ abstract public class MovingEntity extends EntityCreature {
         this.setImmobile(false);
     }
 
-    public Map<String, MovingEntityHook> getHooks() {
-        return hooks;
-    }
+	public void setBaby(boolean isBaby){
+		this.setDataFlag(DATA_FLAGS, Entity.DATA_FLAG_BABY,isBaby);
+	}public Map<String, MovingEntityHook> getHooks() {
+		return hooks;
+	}
 
     public void addHook(String key, MovingEntityHook hook) {
         this.hooks.put(key, hook);
     }
 
-    @Override
-    protected float getGravity() {
-        return 0.092f;
-    }
+	public void removeHook(String key){
+		this.hooks.remove(key);
+	}@Override
+	protected float getGravity() {
+		return 0.092f;
+	}
 
     public Entity getHate() {
         return hate;
@@ -290,7 +295,11 @@ abstract public class MovingEntity extends EntityCreature {
         return route;
     }
 
-    public void setTargetFinder(TargetFinder targetFinder) {
+	public TargetFinder getTargetFinder() {
+		return targetFinder;
+	}
+
+	public void setTargetFinder(TargetFinder targetFinder) {
         this.targetFinder = targetFinder;
     }
 
@@ -315,5 +324,10 @@ abstract public class MovingEntity extends EntityCreature {
     public double getJumpHeight() {
         return 1.25;
     }
+	@Override
+	public boolean attack(EntityDamageEvent source) {
+		new ArrayList<>(this.hooks.values()).forEach(hook -> hook.onDamage(source));
+		return super.attack(source);
+	}
 }
 
