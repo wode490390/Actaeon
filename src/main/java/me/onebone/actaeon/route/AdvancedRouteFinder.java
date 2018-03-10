@@ -282,7 +282,7 @@ public class AdvancedRouteFinder extends RouteFinder {
             vec = vec.floor().clone();
 
             if (!grid.containsKey(vec.x) || !grid.get(vec.x).containsKey(vec.y) || !grid.get(vec.x).get(vec.y).containsKey(vec.z)) {
-                Node node = new Node(vec.x, vec.y, vec.z);
+                Node node = new Node(vec.x + 0.5, vec.y, vec.z + 0.5);
                 this.putNode(node.getVector3(), node);
                 return node;
             }

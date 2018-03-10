@@ -5,11 +5,11 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.Utils.Utils;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.hook.AnimalGrowHook;
 import me.onebone.actaeon.hook.AnimalHook;
 import me.onebone.actaeon.hook.ChickenEggHook;
+import me.onebone.actaeon.util.Utils;
 
 public class Chicken extends Animal implements EntityAgeable, Fallable {
     public static final int NETWORK_ID = 10;
@@ -89,4 +89,10 @@ public class Chicken extends Animal implements EntityAgeable, Fallable {
         return isBaby;
     }
 
+    @Override
+    public boolean isBreedingItem(Item item) {
+        int id = item.getId();
+
+        return id == Item.WHEAT_SEEDS || id == Item.MELON_SEEDS || id == Item.BEETROOT_SEED || id == Item.PUMPKIN_SEEDS;
+    }
 }

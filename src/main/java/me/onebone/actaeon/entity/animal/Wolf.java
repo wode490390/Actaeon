@@ -2,28 +2,23 @@ package me.onebone.actaeon.entity.animal;
 
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityAgeable;
-import cn.nukkit.entity.EntityOwnable;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.Utils.Utils;
-import me.onebone.actaeon.hook.AnimalGrowHook;
+import me.onebone.actaeon.entity.EntityTameable;
 import me.onebone.actaeon.hook.AnimalHook;
 import me.onebone.actaeon.hook.AttackHook;
 
-public class Wolf extends Animal implements EntityAgeable, EntityOwnable{
+public class Wolf extends EntityTameable {
 
 	public static final int NETWORK_ID = 14;
-	private boolean isBaby = false;
-	
-	private Player tamer = null;
-	private boolean hasOwner = false;
 	
 	public Wolf(FullChunk chunk, CompoundTag nbt) {
 		super(chunk, nbt);
+
+		setMaxHealth(isTamed() ? 20 : 8);
 		this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.BONE), 10));
 	}
 
@@ -41,39 +36,30 @@ public class Wolf extends Animal implements EntityAgeable, EntityOwnable{
     public float getHeight() {
         return 0.85f;
     }
-    
-    @Override
-    public boolean isBaby() {
-    	return this.isBaby;
-    }
-    
-    public Player getOwner() {
-    	boolean ss = false;
-    	if(this.tamer != null) {
-    		ss = true;
-    	}
-		if(ss) {
-			return this.tamer;
-		} else {
-			return null;
-		}
-    }
-    
-    public boolean hasOwner() {
-    	return this.hasOwner;
-    }
-    
-    public void setOwner(Player player) {
-    	if(player != null && player.isOnline()) {
-    		this.tamer = player;
-    		this.hasOwner = true;
-    	}
-    }
+
+	public boolean isAngry() {
+		return getDataFlag(DATA_FLAGS, DATA_FLAG_ANGRY);
+	}
+
+	public void setAngry(boolean angry) {
+		setDataFlag(DATA_FLAGS, DATA_FLAG_ANGRY, angry);
+	}
     
     @Override
     public boolean onInteract(Player pla, Item item) {
     	if(!this.hasOwner()) {
-    		if(item.getId() == Item.BONE) {
+			if (item.getId() == Item.BONE && !isAngry()) {
+				item.count--;
+
+				if (this.level.rand.nextInt(3) == 0) {
+					setTamed(true);
+					setMaxHealth(20);
+					setHealth(20);
+					setSitting(true);
+				} else {
+					//TODO: effect
+				}
+
     			this.setOwner(pla);
     		}
     	}
@@ -84,36 +70,11 @@ public class Wolf extends Animal implements EntityAgeable, EntityOwnable{
     public boolean attack(EntityDamageEvent source) {
     	if(source instanceof EntityDamageByEntityEvent) {
     		Entity attacker = ((EntityDamageByEntityEvent)source).getDamager();
-    		if(this.getOwner() != (Player) attacker || !this.hasOwner()) {
+			if (!this.getOwnerName().equalsIgnoreCase(attacker.getName()) || !this.hasOwner()) {
     			this.setHate(attacker);
-    			this.addHook("attack", new AttackHook(this, 1, 2, 1000, 10, 180));
+				this.addHook("attack", new AttackHook(this, 1, 4, 1000, 10, 180));
     		}
     	}
     	return false;
     }
-    
-    @Override
-    protected void initEntity() {
-        super.initEntity();
-        setMaxHealth(10);
-        isBaby = Utils.rand(1, 10) == 1;
-        setBaby(isBaby);
-        if (isBaby) {
-            this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20 * 60 * 10, 20 * 60 * 20)));
-        }
-    }
-
-	@Override
-	public String getOwnerName() {
-		return null;
-	}
-
-	@Override
-	public void setOwnerName(String aname) {
-		
-		
-	}
-    
-    
-
 }

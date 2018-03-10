@@ -4,9 +4,9 @@ import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.Utils.Utils;
 import me.onebone.actaeon.hook.AnimalGrowHook;
 import me.onebone.actaeon.hook.AnimalHook;
+import me.onebone.actaeon.util.Utils;
 
 public class Pig extends Animal implements EntityAgeable {
     public static final int NETWORK_ID = 12;
@@ -72,5 +72,12 @@ public class Pig extends Animal implements EntityAgeable {
     @Override
     public boolean isBaby() {
         return isBaby;
+    }
+
+    @Override
+    public boolean isBreedingItem(Item item) {
+        int id = item.getId();
+
+        return id == Item.POTATO || id == Item.CARROT || id == Item.BEETROOT;
     }
 }

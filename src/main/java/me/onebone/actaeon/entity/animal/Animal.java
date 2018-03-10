@@ -3,14 +3,18 @@ package me.onebone.actaeon.entity.animal;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityAgeable;
+import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.AddEntityPacket;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
-import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.entity.EntityAgeable;
 
-abstract public class Animal extends MovingEntity implements EntityAgeable {
+abstract public class Animal extends EntityAgeable {
+
+    protected Player inLovePlayer;
+    protected int inLoveTicks;
+
     public Animal(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
     }
@@ -18,6 +22,15 @@ abstract public class Animal extends MovingEntity implements EntityAgeable {
     @Override
     public boolean isBaby() {
         return this.getDataFlag(DATA_FLAGS, Entity.DATA_FLAG_BABY);
+    }
+
+    @Override
+    public boolean entityBaseTick(int tickDiff) {
+        boolean hasUpdate = super.entityBaseTick(tickDiff);
+
+        //TODO: taming
+
+        return hasUpdate;
     }
 
     @Override
@@ -43,5 +56,9 @@ abstract public class Animal extends MovingEntity implements EntityAgeable {
         player.dataPacket(pk0);
 
         super.spawnTo(player);
+    }
+
+    public boolean isBreedingItem(Item item) {
+        return item.getId() == Item.WHEAT;
     }
 }
