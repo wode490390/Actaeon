@@ -2,7 +2,7 @@ package me.onebone.actaeon.hook;
 
 import cn.nukkit.math.Vector3;
 import me.onebone.actaeon.entity.MovingEntity;
-import me.onebone.actaeon.utils.Utils;
+import me.onebone.actaeon.Utils.Utils;
 
 /**
  * Created by CreeperFace on 19.7.2017.

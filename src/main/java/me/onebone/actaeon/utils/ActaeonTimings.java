@@ -1,4 +1,4 @@
-package me.onebone.actaeon.utils;
+package me.onebone.actaeon.Utils;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsManager;

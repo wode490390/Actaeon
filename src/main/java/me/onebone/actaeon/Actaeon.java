@@ -8,6 +8,7 @@ import me.onebone.actaeon.entity.animal.Chicken;
 import me.onebone.actaeon.entity.animal.Cow;
 import me.onebone.actaeon.entity.animal.Pig;
 import me.onebone.actaeon.entity.animal.Sheep;
+import me.onebone.actaeon.entity.animal.Wolf;
 import me.onebone.actaeon.entity.monster.Zombie;
 import me.onebone.actaeon.runnable.TaskWatchDog;
 
@@ -34,6 +35,7 @@ public class Actaeon extends PluginBase {
         this.registerEntity("Chicken", Chicken.class);
         this.registerEntity("Pig", Pig.class);
         this.registerEntity("Zombie", Zombie.class);
+        this.registerEntity("Wolf", Wolf.class);
 
         Item.addCreativeItem(Item.get(Item.SPAWN_EGG, Zombie.NETWORK_ID));
         Item.addCreativeItem(Item.get(Item.SPAWN_EGG, 10));
