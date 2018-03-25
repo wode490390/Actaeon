@@ -6,19 +6,29 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.Utils.Utils;
-import me.onebone.actaeon.hook.AnimalGrowHook;
-import me.onebone.actaeon.hook.AnimalHook;
+import com.google.common.collect.Sets;
+import me.onebone.actaeon.hook.AnimalMateHook;
+import me.onebone.actaeon.hook.FollowItemAI;
+import me.onebone.actaeon.hook.FollowParentHook;
+import me.onebone.actaeon.hook.WanderHook;
 
 import java.util.Random;
+import java.util.Set;
 
 public class Cow extends Animal implements EntityAgeable {
+
     public static final int NETWORK_ID = 11;
-    private boolean isBaby = false;
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT));
 
     public Cow(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT), 10));
+
+        this.addHook(1, new AnimalMateHook(this));
+        this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
+        this.addHook(3, new FollowParentHook(this));
+        this.addHook(4, new WanderHook(this));
+
+        setMaxHealth(10);
     }
 
     @Override
@@ -45,11 +55,6 @@ public class Cow extends Animal implements EntityAgeable {
             return 0.65f;
         }
         return 1.2f;
-    }
-
-    @Override
-    public boolean isBaby() {
-        return isBaby;
     }
 
     @Override
@@ -81,18 +86,7 @@ public class Cow extends Animal implements EntityAgeable {
             player.getInventory().addItem(Item.get(335, 0, 1));
             return true;
         }
-        return false;
-    }
 
-    @Override
-    protected void initEntity() {
-        super.initEntity();
-        setMaxHealth(10);
-        isBaby = Utils.rand(1, 10) == 1;
-        setBaby(isBaby);
-        if (isBaby) {
-            this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20 * 60 * 10, 20 * 60 * 20)));
-        }
+        return super.onInteract(player, item);
     }
-
 }

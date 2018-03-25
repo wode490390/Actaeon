@@ -5,20 +5,27 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
+import com.google.common.collect.Sets;
 import me.onebone.actaeon.entity.Fallable;
-import me.onebone.actaeon.hook.AnimalGrowHook;
-import me.onebone.actaeon.hook.AnimalHook;
-import me.onebone.actaeon.hook.ChickenEggHook;
+import me.onebone.actaeon.hook.*;
 import me.onebone.actaeon.util.Utils;
 
+import java.util.Set;
+
 public class Chicken extends Animal implements EntityAgeable, Fallable {
+
     public static final int NETWORK_ID = 10;
-    private boolean isBaby = false;
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT_SEEDS), Item.get(Item.BEETROOT_SEED), Item.get(Item.MELON_SEEDS), Item.get(Item.PUMPKIN_SEEDS));
 
     public Chicken(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT_SEEDS), 10));
-        this.addHook("egg", new ChickenEggHook(this));
+        this.addHook(0, new ChickenEggHook(this));
+        this.addHook(1, new AnimalMateHook(this));
+        this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
+        this.addHook(3, new FollowParentHook(this));
+        this.addHook(4, new WanderHook(this));
+
+        setMaxHealth(4);
     }
 
     @Override
@@ -71,22 +78,6 @@ public class Chicken extends Animal implements EntityAgeable, Fallable {
     @Override
     public int getNetworkId() {
         return NETWORK_ID;
-    }
-
-    @Override
-    protected void initEntity() {
-        super.initEntity();
-        setMaxHealth(4);
-        isBaby = (Utils.rand(1, 11) == 1);
-        setBaby(isBaby);
-        if (isBaby) {
-            this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20 * 60 * 10, 20 * 60 * 20)));
-        }
-    }
-
-    @Override
-    public boolean isBaby() {
-        return isBaby;
     }
 
     @Override

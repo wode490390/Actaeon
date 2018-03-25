@@ -15,64 +15,74 @@ import me.onebone.actaeon.entity.animal.Animal;
 public class EatGrassHook extends MovingEntityHook {
 
     private int timer = 40;
+    private Animal animal;
 
     public EatGrassHook(Animal entity) {
         super(entity);
+        this.animal = entity;
+        setCompatibility(0b111);
+    }
+
+    @Override
+    public boolean shouldExecute() {
+        if (!this.animal.onGround || this.animal.level.rand.nextInt(this.animal.isBaby() ? 50 : 100) != 0) {
+            return false;
+        } else {
+            Block block = this.entity.getLevelBlock();
+
+            return block instanceof BlockTallGrass || block.down() instanceof BlockGrass;
+        }
+    }
+
+    @Override
+    public void startExecuting() {
+        this.timer = 40;
+
+        EntityEventPacket pk = new EntityEventPacket();
+        pk.eid = this.getEntity().getId();
+        pk.event = EntityEventPacket.EAT_GRASS_ANIMATION;
+        Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
+
+        this.entity.getRoute().forceStop();
+        this.entity.routeLeading = false;
+    }
+
+    @Override
+    public void reset() {
+        timer = 0;
+        this.entity.routeLeading = true;
+    }
+
+    @Override
+    public boolean canContinue() {
+        return timer > 0;
     }
 
     @Override
     public void onUpdate(int tick) {
-        if (!this.executing) {
-            if (this.entity.level.rand.nextInt(((Animal) this.entity).isBaby() ? 50 : 1000) != 0) {
-                return;
-            } else {
-                Block block = this.entity.getLevelBlock();
-
-                if (block instanceof BlockTallGrass || block.down() instanceof BlockGrass) {
-                    this.timer = 40;
-
-                    EntityEventPacket pk = new EntityEventPacket();
-                    pk.eid = this.getEntity().getId();
-                    pk.event = EntityEventPacket.EAT_GRASS_ANIMATION;
-                    Server.broadcastPacket(this.getEntity().getViewers().values(), pk);
-                    this.executing = true;
-                    this.entity.routeLeading = false;
-                    this.entity.getRoute().forceStop();
-                    this.entity.getRoute().arrived();
-                }
-            }
-
-            return;
-        }
-
         this.timer = Math.max(0, this.timer - 1);
 
         if (this.timer == 4) {
             Block block = this.entity.getLevelBlock();
 
             if (block instanceof BlockTallGrass) {
-                //if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                this.entity.level.useBreakOn(block);
-                //}
+                if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
+                    this.entity.level.useBreakOn(block);
+                }
 
-                //TODO: grow bonus
+                this.animal.eatGrass();
             } else {
                 block = block.down();
 
                 if (block.getId() == Block.GRASS) {
-                    //if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                    this.entity.level.addParticle(new DestroyBlockParticle(block, block));
-                    this.entity.level.setBlock(block, new BlockDirt(), true, false);
-                    //}
+                    if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
+                        this.entity.level.addParticle(new DestroyBlockParticle(block, block));
+                        this.entity.level.setBlock(block, new BlockDirt(), true, false);
+                    }
 
-                    //TODO: grow bonus
+                    this.animal.eatGrass();
                 }
             }
-        }
-
-        if (timer == 0) {
-            this.executing = false;
-            this.entity.routeLeading = true;
         }
     }
 }

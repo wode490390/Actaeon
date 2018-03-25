@@ -25,7 +25,7 @@ public class AdvancedRouteFinder extends RouteFinder {
     @Override
     public boolean search() {
         //ActaeonTimings.routeFindTiming.startTiming();
-        this.stopRouteFindUntil = System.currentTimeMillis() + 250;
+        this.stopRouteFindUntil = System.currentTimeMillis() + 20;
         this.succeed = false;
         this.searching = true;
 
@@ -137,6 +137,9 @@ public class AdvancedRouteFinder extends RouteFinder {
         }
 
         //ActaeonTimings.routeFindTiming.stopTiming();
+        Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
+        if (highestUnder != null)
+            this.addNode(new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ())));
         return this.succeed = this.searching = false;
     }
 

@@ -5,20 +5,19 @@ import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
-import me.onebone.actaeon.hook.AttackHook;
 import me.onebone.actaeon.hook.WanderHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
-public class Zombie extends Monster implements EntityAgeable, Fallable, Climbable {
+public class Zombie extends Monster implements EntityAgeable, Fallable {
     public static final int NETWORK_ID = 32;
 
     public Zombie(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.setTargetFinder(new AreaHaterTargetFinder(this, Player.class, 500, 16));
-        this.addHook("attack", new AttackHook(this, this.getAttackDistance(), this.getDamage(), 1000, 10, 180));
-        this.addHook("wander", new WanderHook(this));
+        this.addHook(4, new WanderHook(this));
+
+        setMaxHealth(20);
     }
 
     @Override
@@ -64,12 +63,6 @@ public class Zombie extends Monster implements EntityAgeable, Fallable, Climbabl
     @Override
     public int getNetworkId() {
         return NETWORK_ID;
-    }
-
-    @Override
-    protected void initEntity() {
-        super.initEntity();
-        setMaxHealth(20);
     }
 
     @Override

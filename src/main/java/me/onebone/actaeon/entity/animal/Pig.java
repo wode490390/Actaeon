@@ -4,17 +4,27 @@ import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.hook.AnimalGrowHook;
-import me.onebone.actaeon.hook.AnimalHook;
-import me.onebone.actaeon.util.Utils;
+import com.google.common.collect.Sets;
+import me.onebone.actaeon.hook.AnimalMateHook;
+import me.onebone.actaeon.hook.FollowItemAI;
+import me.onebone.actaeon.hook.FollowParentHook;
+import me.onebone.actaeon.hook.WanderHook;
+
+import java.util.Set;
 
 public class Pig extends Animal implements EntityAgeable {
+
     public static final int NETWORK_ID = 12;
-    private boolean isBaby = false;
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.BEETROOT), Item.get(Item.CARROT), Item.get(Item.POTATO));
 
     public Pig(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.CARROTS), 10));
+        this.addHook(1, new AnimalMateHook(this));
+        this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
+        this.addHook(3, new FollowParentHook(this));
+        this.addHook(4, new WanderHook(this));
+
+        setMaxHealth(10);
     }
 
     @Override
@@ -56,22 +66,6 @@ public class Pig extends Animal implements EntityAgeable {
     @Override
     public int getNetworkId() {
         return NETWORK_ID;
-    }
-
-    @Override
-    protected void initEntity() {
-        super.initEntity();
-        setMaxHealth(10);
-        isBaby = Utils.rand(1, 11) == 1;
-        setBaby(isBaby);
-        if (isBaby) {
-            this.addHook("grow", new AnimalGrowHook(this, Utils.rand(20 * 60 * 10, 20 * 60 * 20)));
-        }
-    }
-
-    @Override
-    public boolean isBaby() {
-        return isBaby;
     }
 
     @Override

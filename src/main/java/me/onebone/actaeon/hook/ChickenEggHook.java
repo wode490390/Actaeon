@@ -2,9 +2,9 @@ package me.onebone.actaeon.hook;
 
 
 import cn.nukkit.Server;
-import me.onebone.actaeon.Utils.Utils;
 import me.onebone.actaeon.entity.MovingEntity;
 import me.onebone.actaeon.task.ChickenEggTask;
+import me.onebone.actaeon.util.Utils;
 
 /**
  * Copyright © 2016 WetABQ&DreamCityAdminGroup All right reserved.
@@ -28,10 +28,17 @@ public class ChickenEggHook extends MovingEntityHook {
     }
 
     @Override
-    public void onUpdate(int tick) {
-        if (tick >= nextEggTick) {
-            nextEggTick = tick + Utils.rand(6000, 12000);
-            this.entity.updateBotTask(new ChickenEggTask(entity));
-        }
+    public boolean shouldExecute() {
+        return Server.getInstance().getTick() <= nextEggTick;
+    }
+
+    @Override
+    public void startExecuting() {
+        this.entity.updateBotTask(new ChickenEggTask(entity));
+    }
+
+    @Override
+    public boolean canContinue() {
+        return false;
     }
 }

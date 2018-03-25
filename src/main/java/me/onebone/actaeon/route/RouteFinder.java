@@ -171,6 +171,10 @@ public abstract class RouteFinder {
         this.arrived = true;
     }
 
+    public boolean hasArrived() {
+        return arrived;
+    }
+
     public boolean hasRoute() {
         return this.nodes.size() > 0;
     }

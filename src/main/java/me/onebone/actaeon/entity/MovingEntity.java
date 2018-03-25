@@ -1,26 +1,25 @@
 package me.onebone.actaeon.entity;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockLiquid;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
+import me.onebone.actaeon.hook.HookManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.RouteFinder;
-import me.onebone.actaeon.runnable.RouteFinderSearchAsyncTask;
 import me.onebone.actaeon.target.TargetFinder;
 import me.onebone.actaeon.task.MovingEntityTask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
 abstract public class MovingEntity extends EntityCreature {
     private boolean isKnockback = false;
@@ -30,7 +29,7 @@ abstract public class MovingEntity extends EntityCreature {
     private Entity hate = null;
     private String targetSetter = "";
     public boolean routeLeading = true;
-    private Map<String, MovingEntityHook> hooks = new HashMap<>();
+    private HookManager hookManager = new HookManager();
     private MovingEntityTask task = null;
     private boolean lookAtFront = true;
 
@@ -46,16 +45,12 @@ abstract public class MovingEntity extends EntityCreature {
         this.setDataFlag(DATA_FLAGS, Entity.DATA_FLAG_BABY, isBaby);
     }
 
-    public Map<String, MovingEntityHook> getHooks() {
-        return hooks;
+    public void addHook(int priority, MovingEntityHook hook) {
+        this.hookManager.addHook(priority, hook);
     }
 
-    public void addHook(String key, MovingEntityHook hook) {
-        this.hooks.put(key, hook);
-    }
-
-    public void removeHook(String key) {
-        this.hooks.remove(key);
+    public void removeHook(MovingEntityHook hook) {
+        this.hookManager.removeHook(hook);
     }
 
     @Override
@@ -89,13 +84,7 @@ abstract public class MovingEntity extends EntityCreature {
             return false;
         }
 
-        new ArrayList<>(this.hooks.values()).forEach(hook -> {
-
-
-            if (hook.shouldExecute()) {
-                hook.onUpdate(Server.getInstance().getTick());
-            }
-        });
+        this.hookManager.onUpdate(getServer().getTick());
         if (this.task != null) this.task.onUpdate(Server.getInstance().getTick());
 
         boolean hasUpdate = super.entityBaseTick(tickDiff);
@@ -106,8 +95,13 @@ abstract public class MovingEntity extends EntityCreature {
             this.motionX = this.motionZ = 0;
         }
 
-        this.motionX *= (1 - this.getDrag());
-        this.motionZ *= (1 - this.getDrag());
+        double friction = 1 - this.getDrag();
+
+        if (this.onGround && (Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionZ) > 0.00001))
+            friction *= this.getLevel().getBlock(this.temporalVector.setComponents((int) Math.floor(this.x), (int) Math.floor(this.y - 1), (int) Math.floor(this.z) - 1)).getFrictionFactor();
+
+        this.motionX *= friction;
+        this.motionZ *= friction;
 
         if (this.targetFinder != null) this.targetFinder.onUpdate();
 
@@ -115,8 +109,23 @@ abstract public class MovingEntity extends EntityCreature {
             this.route.forceStop();
         }
 
-        if (this.routeLeading && this.onGround && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)) { // 대상이 이동함
-            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+        double swim = 0;
+
+        for (Block block : getCollisionBlocks()) {
+            if (block instanceof BlockLiquid) {
+                float f = ((BlockLiquid) block).getFluidHeightPercent();
+                double minY = block.getFloorY();
+                double maxY = minY + 1 - f;
+
+                swim = Math.max(swim, this.boundingBox.maxY >= maxY ? maxY - this.boundingBox.minY : this.boundingBox.maxY - minY);
+                break;
+            }
+        }
+
+        if (this.routeLeading && (this.onGround || swim > 0) && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)) { // 대상이 이동함
+            //Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+            this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
+            this.route.search();
 
 			/*if(this.route.isSearching()) this.route.research();
             else this.route.search();*/
@@ -127,6 +136,7 @@ abstract public class MovingEntity extends EntityCreature {
         if (!this.isImmobile()) {
             if (this.routeLeading && !this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()) { // entity has route to go
                 hasUpdate = true;
+                //MainLogger.getLogger().info("MOVE");
 
                 Node node = this.route.get();
                 if (node != null) {
@@ -150,25 +160,61 @@ abstract public class MovingEntity extends EntityCreature {
                             double angle = Math.atan2(vec.z - this.z, vec.x - this.x);
                             this.setRotation((angle * 180) / Math.PI - 90, 0);
                         }
+
+                        /*if(getRealTarget() instanceof Entity)
+                            lookAt(getTarget());*/
                     }
                 }
             }
 
             for (Entity entity : this.getLevel().getCollidingEntities(this.boundingBox)) {
                 if (this.canCollide() && this.canCollideWith(entity)) {
-                    Vector3 motion = this.subtract(entity);
+                    /*Vector3 motion = this.subtract(entity);
                     this.motionX += motion.x / 2;
-                    this.motionZ += motion.z / 2;
+                    this.motionZ += motion.z / 2;*/
+                    applyEntityCollision(entity);
                 }
             }
 
-            if ((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally) {
-                this.jump();
+            if (swim != 0) {
+                if (this.level.rand.nextFloat() < 0.8) {
+                    this.motionY = Math.min(0.2, this.motionY + (0.2 * swim));
+                }
+
+                this.motionX *= 0.3;
+                this.motionZ *= 0.3;
             }
+
+            if ((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally) {
+                AxisAlignedBB bb = this.boundingBox.clone().offset(this.motionX, this.motionY, this.motionZ);
+                Block[] blocks = this.level.getCollisionBlocks(bb);
+
+                boolean jump = false;
+                boolean step = true;
+
+                for (Block b : blocks) {
+                    AxisAlignedBB blockBB = b.getBoundingBox();
+                    if (blockBB == null || b.canPassThrough())
+                        continue;
+
+                    double diffY = blockBB.maxY - this.boundingBox.minY;
+                    if (diffY < getJumpHeight()) {
+                        jump = true;
+                    }
+
+                    if (step)
+                        step = diffY <= getStepHeight();
+                }
+
+                if (jump && !step) {
+                    this.jump();
+                }
+            }
+
             this.move(this.motionX, this.motionY, this.motionZ);
 
             this.checkGround();
-            if (!this.onGround) {
+            if (!this.onGround && swim == 0) {
                 this.motionY -= this.getGravity();
                 //Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
                 hasUpdate = true;
@@ -191,6 +237,8 @@ abstract public class MovingEntity extends EntityCreature {
 
     public void setTarget(Vector3 vec, String identifier, boolean forceSearch) {
         if (identifier == null) return;
+        if (Objects.equals(this.target, vec))
+            return;
 
         if (forceSearch || !this.hasSetTarget() || identifier.equals(this.targetSetter)) {
             this.target = vec;
@@ -200,7 +248,8 @@ abstract public class MovingEntity extends EntityCreature {
 
         if (this.hasSetTarget() && (forceSearch || !this.route.hasRoute())) {
             this.route.forceStop();
-            Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox.clone()));
+            this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
+            this.route.search();
 			/*if(this.route.isSearching()) this.route.research();
 			else this.route.search();*/
         }
@@ -325,14 +374,27 @@ abstract public class MovingEntity extends EntityCreature {
         this.lookAtFront = lookAtFront;
     }
 
+    public void lookAt(Vector3 pos) {
+        Vector3 diff = pos.subtract(this.add(0, getEyeHeight()));
+
+        double length = Math.sqrt(diff.x * diff.x + diff.z * diff.z);
+
+        double newPitch = Math.atan2(diff.z, diff.x) * (180 / Math.PI) - 90;
+        double newYaw = -(Math.atan2(diff.y, length) * (180 / Math.PI));
+
+        this.setRotation(newYaw, newPitch);
+    }
+
     public double getJumpHeight() {
         return 1.25;
     }
 
-    @Override
-    public boolean attack(EntityDamageEvent source) {
-        new ArrayList<>(this.hooks.values()).forEach(hook -> hook.onDamage(source));
-        return super.attack(source);
+    /*public boolean isBaby() {
+        return false;
+    }*/
+
+    public int getAge() {
+        return age;
     }
 }
 

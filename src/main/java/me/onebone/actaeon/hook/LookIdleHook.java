@@ -15,4 +15,9 @@ public class LookIdleHook extends MovingEntityHook {
     public void onUpdate(int tick) {
         //TODO
     }
+
+    @Override
+    public boolean shouldExecute() {
+        return false;
+    }
 }

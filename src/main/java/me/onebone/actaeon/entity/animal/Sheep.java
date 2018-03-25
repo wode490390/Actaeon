@@ -1,18 +1,45 @@
 package me.onebone.actaeon.entity.animal;
 
+import cn.nukkit.Player;
+import cn.nukkit.entity.data.ByteEntityData;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import me.onebone.actaeon.hook.AnimalHook;
+import cn.nukkit.utils.DyeColor;
+import com.google.common.collect.Sets;
+import me.onebone.actaeon.hook.AnimalMateHook;
+import me.onebone.actaeon.hook.FollowItemAI;
+import me.onebone.actaeon.hook.FollowParentHook;
+import me.onebone.actaeon.hook.WanderHook;
 
 import java.util.Random;
+import java.util.Set;
 
 public class Sheep extends Animal {
+
     public static final int NETWORK_ID = 13;
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT));
 
     public Sheep(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.addHook("targetFinder", new AnimalHook(this, 500, Item.get(Item.WHEAT), 10));
+        this.setMaxHealth(8);
+
+        if (!namedTag.contains("Color")) {
+            namedTag.putByte("Color", getRandomSheepColor().getWoolData());
+        }
+
+        this.addHook(1, new AnimalMateHook(this));
+        this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
+        this.addHook(3, new FollowParentHook(this));
+        this.addHook(4, new WanderHook(this));
+    }
+
+    @Override
+    public void saveNBT() {
+        super.saveNBT();
+
+        namedTag.putByte("Color", getColor().getWoolData());
     }
 
     @Override
@@ -56,9 +83,65 @@ public class Sheep extends Animal {
         return super.entityBaseTick(tickDiff);
     }
 
+    public void setColor(DyeColor color) {
+        setColor(color.getWoolData());
+    }
+
+    public void setColor(int color) {
+        this.setDataProperty(new ByteEntityData(DATA_COLOUR, color));
+    }
+
+    public DyeColor getColor() {
+        return DyeColor.getByWoolData(getDataPropertyByte(DATA_COLOR));
+    }
+
+    public void setSheared(boolean sheared) {
+        this.setDataFlag(DATA_FLAGS, DATA_FLAG_SHEARED, sheared);
+    }
+
+    public boolean isSheared() {
+        return getDataFlag(DATA_FLAGS, DATA_FLAG_SHEARED);
+    }
+
+    public static DyeColor getRandomSheepColor() {
+        Random random = new Random();
+
+        int i = random.nextInt(100);
+        return i < 5 ? DyeColor.BLACK : (i < 10 ? DyeColor.GRAY : (i < 15 ? DyeColor.LIGHT_GRAY : (i < 18 ? DyeColor.BROWN : (random.nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE))));
+    }
+
     @Override
-    protected void initEntity() {
-        super.initEntity();
-        this.setMaxHealth(8);
+    public boolean onInteract(Player player, Item item) {
+        if (item.getId() == Item.SHEARS && !isSheared()) {
+            this.setSheared(true);
+
+            int count = 1 + this.level.rand.nextInt(3);
+            while (count-- > 0) {
+                this.level.dropItem(this.add(0, 1), Item.get(Item.WOOL, getColor().getWoolData()), new Vector3(
+                        (this.level.rand.nextFloat() - this.level.rand.nextFloat()) * 0.1,
+                        this.level.rand.nextFloat() * 0.05,
+                        (this.level.rand.nextFloat() - this.level.rand.nextFloat()) * 0.1
+                ));
+            }
+
+            return true;
+        } else if (item.getId() == Item.DYE) {
+            DyeColor color = DyeColor.getByDyeData(item.getDamage());
+
+            if (color != null) {
+                this.setColor(color);
+                return true;
+            }
+        }
+
+        return super.onInteract(player, item);
+    }
+
+    public void eatGrass() {
+        this.setSheared(false);
+
+        if (this.isBaby()) {
+            addGrowth(60);
+        }
     }
 }
