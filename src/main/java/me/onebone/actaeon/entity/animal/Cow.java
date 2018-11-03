@@ -7,10 +7,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.google.common.collect.Sets;
-import me.onebone.actaeon.hook.AnimalMateHook;
-import me.onebone.actaeon.hook.FollowItemAI;
-import me.onebone.actaeon.hook.FollowParentHook;
-import me.onebone.actaeon.hook.WanderHook;
+import me.onebone.actaeon.hook.*;
 
 import java.util.Random;
 import java.util.Set;
@@ -27,6 +24,8 @@ public class Cow extends Animal implements EntityAgeable {
         this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
         this.addHook(3, new FollowParentHook(this));
         this.addHook(4, new WanderHook(this));
+        this.addHook(5, new WatchClosestHook(this, Player.class, 6));
+        this.addHook(6, new LookIdleHook(this));
 
         setMaxHealth(10);
     }

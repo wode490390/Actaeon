@@ -31,11 +31,11 @@ public class AreaHaterTargetFinder extends TargetFinder {
         }
 
         if (near != null) {
-            this.getEntity().setTarget(near, this.getEntity().getName(), this.first);
+            this.getEntity().setTarget(EntityTarget.builder().target(near).identifier(this.getEntity().getName()).build(), this.first);
             this.getEntity().setHate(near);
         } else {
             //this.getEntity().getRoute().forceStop();
-            this.getEntity().setTarget(null, this.getEntity().getName());
+            this.getEntity().setTarget(null);
             this.getEntity().setHate(null);
         }
         this.first = false;

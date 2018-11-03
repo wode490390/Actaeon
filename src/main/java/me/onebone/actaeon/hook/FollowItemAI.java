@@ -3,6 +3,7 @@ package me.onebone.actaeon.hook;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.target.EntityTarget;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -22,7 +23,8 @@ public class FollowItemAI extends MovingEntityHook {
         super(entity);
         this.items = items.stream().map(Item::getId).collect(Collectors.toSet());
         this.range = range * range;
-        setCompatibility(0b11);
+
+        setCompatibility(FLAG_MOVEMENT | FLAG_ROTATION);
     }
 
     @Override
@@ -30,6 +32,14 @@ public class FollowItemAI extends MovingEntityHook {
         if (delay > 0) {
             delay--;
             return false;
+        }
+
+        if (this.holder != null && this.holder.isAlive() && this.holder.distanceSquared(this.entity) <= this.range) {
+            Item item = this.holder.getInventory().getItemInHand();
+
+            if (items.contains(item.getId())) {
+                return true;
+            }
         }
 
         this.holder = findClosestPlayer();
@@ -46,7 +56,7 @@ public class FollowItemAI extends MovingEntityHook {
         if (this.holder.distanceSquared(this.entity) < 6.25) {
             this.entity.getRoute().forceStop();
         } else {
-            this.entity.setTarget(this.holder, "followItem", true);
+            this.entity.setTarget(EntityTarget.builder().target(this.holder).identifier(this.holder.getName()).speed(2f).build(), true);
         }
     }
 
@@ -72,8 +82,10 @@ public class FollowItemAI extends MovingEntityHook {
 
     @Override
     public void reset() {
-        this.holder = null;
         this.entity.getRoute().forceStop();
+        this.entity.setTarget(EntityTarget.builder().identifier(this.entity.getName()).build(), true);
+
+        this.holder = null;
         this.delay = 100;
     }
 }

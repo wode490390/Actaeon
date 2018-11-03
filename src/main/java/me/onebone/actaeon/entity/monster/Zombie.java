@@ -10,11 +10,14 @@ import me.onebone.actaeon.hook.WanderHook;
 import me.onebone.actaeon.target.AreaHaterTargetFinder;
 
 public class Zombie extends Monster implements EntityAgeable, Fallable {
+
     public static final int NETWORK_ID = 32;
 
     public Zombie(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.setTargetFinder(new AreaHaterTargetFinder(this, Player.class, 500, 16));
+
+
         this.addHook(4, new WanderHook(this));
 
         setMaxHealth(20);

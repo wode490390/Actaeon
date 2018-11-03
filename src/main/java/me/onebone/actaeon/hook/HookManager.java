@@ -72,7 +72,7 @@ public class HookManager {
                     if (!areHooksCompatibile(running.hook, entry.hook)) {
                         return false;
                     }
-                } else if (running.hook.isInterruptible()) {
+                } else if (!running.hook.isInterruptible()) {
                     return false;
                 }
             }

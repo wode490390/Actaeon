@@ -24,7 +24,6 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     @Override
     public boolean search() {
-        //ActaeonTimings.routeFindTiming.startTiming();
         this.stopRouteFindUntil = System.currentTimeMillis() + 20;
         this.succeed = false;
         this.searching = true;
@@ -73,6 +72,7 @@ public class AdvancedRouteFinder extends RouteFinder {
                 while ((node = node.getParent()) != null) {
                     Node lastNode = nodes.get(nodes.size() - 1);
                     node.add(0.5, 0, 0.5);
+
                     Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
                     if (lastNode.getY() == node.getY() && direction.lengthSquared() > 0) {  //Y不改变
                         WalkableIterator iterator = new WalkableIterator(this, level, lastNode.getVector3(), direction, 0, (int) lastNode.getVector3().distance(node.getVector3()) + 1);
@@ -136,14 +136,13 @@ public class AdvancedRouteFinder extends RouteFinder {
             }
         }
 
-        //ActaeonTimings.routeFindTiming.stopTiming();
         Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
         if (highestUnder != null)
             this.addNode(new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ())));
         return this.succeed = this.searching = false;
     }
 
-    public Set<Node> getNeighbors(Node node) {
+    private Set<Node> getNeighbors(Node node) {
         Set<Node> neighbors = new HashSet<>();
 
         Vector3 vec = node.getVector3();
@@ -185,34 +184,36 @@ public class AdvancedRouteFinder extends RouteFinder {
         return neighbors;
     }
 
-    public Vector3 getHighestUnder(double x, double dy, double z) {
-        return this.getHighestUnder(x, dy, z, (int) dy);
+    private Vector3 getHighestUnder(double x, double dy, double z) {
+        return this.getHighestUnder(x, dy, z, 5);
     }
 
     public Vector3 getHighestUnder(double x, double dy, double z, int limit) {
         int minY = (int) dy - limit < 0 ? 0 : (int) dy - limit;
-        for (int y = (int) dy; y >= minY; y--) {
+
+        for (int y = (int) Math.min(dy, 255); y >= minY; y--) {
             int blockId = level.getBlockIdAt((int) x, y, (int) z);
-            if (!canWalkOn(blockId)) return new Vector3(x, y, z);
-            if (!Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
+            if (canWalkOn(blockId) || !Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
         }
+
         return null;
     }
 
-    public double isWalkableAt(Vector3 vec) {
+    double isWalkableAt(Vector3 vec) {
         Vector3 block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
         if (block == null) return -256;
 
         double diff = (block.y - vec.y) + 1;
 
-        if ((this.entity instanceof Fallable || -4 < diff) && (this.entity instanceof Climbable || diff <= 1) && canWalkOn(this.entity.getLevel().getBlockIdAt((int) block.x, (int) block.y, (int) block.z))) {
+        if ((this.entity instanceof Fallable || diff >= -4) && (this.entity instanceof Climbable || diff <= 1)/* && canWalkOn(this.entity.getLevel().getBlockIdAt((int) block.x, (int) block.y, (int) block.z))*/) {
             return diff;
         }
+
         return -256;
     }
 
     private boolean canWalkOn(int blockId) {
-        return !(blockId == Block.LAVA || blockId == Block.STILL_LAVA);
+        return blockId == Block.LAVA || blockId == Block.STILL_LAVA;
     }
 
     private double heuristic(Vector3 one, Vector3 two) {

@@ -12,9 +12,12 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public abstract class MovingEntityHook {
 
+    public static final int FLAG_MOVEMENT = 0x01;
+    public static final int FLAG_ROTATION = 0x02;
+    public static final int FLAG_BUSY = 0x03;
+
     protected final MovingEntity entity;
 
-    public boolean executing = false;
     private int compatibility;
 
     public MovingEntityHook(MovingEntity entity) {

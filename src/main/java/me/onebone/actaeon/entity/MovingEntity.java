@@ -11,32 +11,57 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
+import lombok.Getter;
 import me.onebone.actaeon.hook.HookManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
 import me.onebone.actaeon.route.Node;
 import me.onebone.actaeon.route.RouteFinder;
+import me.onebone.actaeon.route.SimpleRouteFinder;
+import me.onebone.actaeon.target.EntityTarget;
 import me.onebone.actaeon.target.TargetFinder;
 import me.onebone.actaeon.task.MovingEntityTask;
+import me.onebone.actaeon.util.ActaeonTimings;
+import me.onebone.actaeon.util.Utils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 abstract public class MovingEntity extends EntityCreature {
+
     private boolean isKnockback = false;
-    private RouteFinder route = null;
+
+    private Map<Class<? extends RouteFinder>, RouteFinder> routeFinders = new HashMap<>();
+    private RouteFinder route;
+
     private TargetFinder targetFinder = null;
-    private Vector3 target = null;
+
+    private EntityTarget target = null;
+
     private Entity hate = null;
-    private String targetSetter = "";
+
     public boolean routeLeading = true;
+
     private HookManager hookManager = new HookManager();
+
     private MovingEntityTask task = null;
-    private boolean lookAtFront = true;
+
+    public boolean isCollidedX = false;
+    public boolean isCollidedZ = false;
+
+    public double headYaw;
+
+    @Getter
+    private EntityLookManager lookManager = new EntityLookManager(this);
 
     public MovingEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
-        this.route = new AdvancedRouteFinder(this);
+        registerRouteFinder(new AdvancedRouteFinder(this));
+        registerRouteFinder(new SimpleRouteFinder(this));
+
+        this.setRouteFinder(AdvancedRouteFinder.class);
         //this.route = new SimpleRouteFinder(this);
         this.setImmobile(false);
     }
@@ -84,143 +109,171 @@ abstract public class MovingEntity extends EntityCreature {
             return false;
         }
 
+        ActaeonTimings.HOOK_TICK.startTiming();
         this.hookManager.onUpdate(getServer().getTick());
+        ActaeonTimings.HOOK_TICK.stopTiming();
+
         if (this.task != null) this.task.onUpdate(Server.getInstance().getTick());
+
+        this.lookManager.onUpdate();
 
         boolean hasUpdate = super.entityBaseTick(tickDiff);
 
-        if (this.isKnockback) {                   // knockback 이 true 인 경우는 맞은 직후
+        ActaeonTimings.MOVE_TICK.startTiming();
 
-        } else if (this.routeLeading && this.onGround) {
-            this.motionX = this.motionZ = 0;
-        }
+        try {
+//            if (this.isKnockback) {                   // knockback 이 true 인 경우는 맞은 직후
+//
+//            } else if (this.routeLeading && this.onGround) {
+//                this.motionX = this.motionZ = 0;
+//            }
 
-        double friction = 1 - this.getDrag();
+            double friction = 1 - this.getDrag();
 
-        if (this.onGround && (Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionZ) > 0.00001))
-            friction *= this.getLevel().getBlock(this.temporalVector.setComponents((int) Math.floor(this.x), (int) Math.floor(this.y - 1), (int) Math.floor(this.z) - 1)).getFrictionFactor();
+            if (this.onGround && (Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionZ) > 0.00001))
+                friction *= this.getLevel().getBlock(this.temporalVector.setComponents((int) Math.floor(this.x), (int) Math.floor(this.y - 1), (int) Math.floor(this.z) - 1)).getFrictionFactor();
 
-        this.motionX *= friction;
-        this.motionZ *= friction;
+            this.motionX *= friction;
+            this.motionZ *= friction;
 
-        if (this.targetFinder != null) this.targetFinder.onUpdate();
+            if (this.targetFinder != null) this.targetFinder.onUpdate();
 
-        if (this.route.isSearching() && System.currentTimeMillis() - this.route.stopRouteFindUntil > 1000) {
-            this.route.forceStop();
-        }
-
-        double swim = 0;
-
-        for (Block block : getCollisionBlocks()) {
-            if (block instanceof BlockLiquid) {
-                float f = ((BlockLiquid) block).getFluidHeightPercent();
-                double minY = block.getFloorY();
-                double maxY = minY + 1 - f;
-
-                swim = Math.max(swim, this.boundingBox.maxY >= maxY ? maxY - this.boundingBox.minY : this.boundingBox.maxY - minY);
-                break;
+            if (this.route.isSearching() && System.currentTimeMillis() - this.route.stopRouteFindUntil > 1000) {
+                this.route.forceStop();
             }
-        }
 
-        if (this.routeLeading && (this.onGround || swim > 0) && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > 2)) { // 대상이 이동함
-            //Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
-            this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
-            this.route.search();
+            double swim = 0;
+
+            for (Block block : getCollisionBlocks()) {
+                if (block instanceof BlockLiquid) {
+                    float f = ((BlockLiquid) block).getFluidHeightPercent();
+                    double minY = block.getFloorY();
+                    double maxY = minY + 1 - f;
+
+                    swim = Math.max(swim, this.boundingBox.maxY >= maxY ? maxY - this.boundingBox.minY : this.boundingBox.maxY - minY);
+                    break;
+                }
+            }
+
+            if (this.routeLeading && (this.onGround || swim > 0) && this.hasSetTarget() && !this.route.isSearching() && System.currentTimeMillis() >= this.route.stopRouteFindUntil && (this.route.getDestination() == null || this.route.getDestination().distance(this.getTarget()) > maxTargetDistance())) { // 대상이 이동함
+                //Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
+                this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
+
+                ActaeonTimings.PATH_SEARCH.startTiming();
+                this.route.search();
+                ActaeonTimings.PATH_SEARCH.stopTiming();
 
 			/*if(this.route.isSearching()) this.route.research();
             else this.route.search();*/
 
-            hasUpdate = true;
-        }
-
-        if (!this.isImmobile()) {
-            if (this.routeLeading && !this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()) { // entity has route to go
                 hasUpdate = true;
-                //MainLogger.getLogger().info("MOVE");
+            }
 
-                Node node = this.route.get();
-                if (node != null) {
-                    //level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
-                    Vector3 vec = node.getVector3();
-                    double diffX = Math.pow(vec.x - this.x, 2);
-                    double diffZ = Math.pow(vec.z - this.z, 2);
+            if (!this.isImmobile()) {
+                double moveMotionX = 0;
+                double moveMotionZ = 0;
 
-                    if (diffX + diffZ == 0) {
-                        if (!this.route.next()) {
-                            this.route.arrived();
-                            //Server.getInstance().getLogger().warning(vec.toString());
-                        }
-                    } else {
-                        int negX = vec.x - this.x < 0 ? -1 : 1;
-                        int negZ = vec.z - this.z < 0 ? -1 : 1;
+                if (this.routeLeading && !this.isKnockback && !this.route.isSearching() && this.route.isSuccess() && this.route.hasRoute()) { // entity has route to go
+                    hasUpdate = true;
+                    //MainLogger.getLogger().info("MOVE");
 
-                        this.motionX = Math.min(Math.abs(vec.x - this.x), diffX / (diffX + diffZ) * this.getMovementSpeed()) * negX;
-                        this.motionZ = Math.min(Math.abs(vec.z - this.z), diffZ / (diffX + diffZ) * this.getMovementSpeed()) * negZ;
-                        if (this.lookAtFront) {
-                            double angle = Math.atan2(vec.z - this.z, vec.x - this.x);
-                            this.setRotation((angle * 180) / Math.PI - 90, 0);
-                        }
+                    Node node = this.route.get();
+                    if (node != null) {
+                        //level.addParticle(new cn.nukkit.level.particle.RedstoneParticle(node.getVector3(), 2));
+                        Vector3 vec = node.getVector3();
+                        double diffX = Math.pow(vec.x - this.x, 2);
+                        double diffZ = Math.pow(vec.z - this.z, 2);
+
+                        if (diffX + diffZ == 0) {
+                            if (!this.route.next()) {
+                                this.route.arrived();
+                                //Server.getInstance().getLogger().warning(vec.toString());
+                            }
+                        } else {
+//                            Vector3 motion = vec.subtract(this).normalize().multiply(this.getMovementSpeed());
+//
+//                            this.motionX = motion.x;
+//                            this.motionZ = motion.z;
+                            int negX = vec.x - this.x < 0 ? -1 : 1;
+                            int negZ = vec.z - this.z < 0 ? -1 : 1;
+
+                            moveMotionX = Math.min(Math.abs(vec.x - this.x), diffX / (diffX + diffZ) * this.getMovementSpeed()) * negX;
+                            moveMotionZ = Math.min(Math.abs(vec.z - this.z), diffZ / (diffX + diffZ) * this.getMovementSpeed()) * negZ;
+
+
+//                            if(this.getServer().getTick() % 5 == 0) {
+//                                TracePrinter.print(this.level, this, vec, 7);
+//                            }
+
+                            if (!this.target.isWatchTarget()) {
+                                this.setRotation(Utils.getYawBetween(this, vec), 0);
+                            }
 
                         /*if(getRealTarget() instanceof Entity)
                             lookAt(getTarget());*/
+                        }
                     }
                 }
-            }
 
-            for (Entity entity : this.getLevel().getCollidingEntities(this.boundingBox)) {
-                if (this.canCollide() && this.canCollideWith(entity)) {
+                for (Entity entity : this.getLevel().getCollidingEntities(this.boundingBox)) {
+                    if (this.canCollide() && this.canCollideWith(entity)) {
                     /*Vector3 motion = this.subtract(entity);
                     this.motionX += motion.x / 2;
                     this.motionZ += motion.z / 2;*/
-                    applyEntityCollision(entity);
-                }
-            }
-
-            if (swim != 0) {
-                if (this.level.rand.nextFloat() < 0.8) {
-                    this.motionY = Math.min(0.2, this.motionY + (0.2 * swim));
+                        applyEntityCollision(entity);
+                    }
                 }
 
-                this.motionX *= 0.3;
-                this.motionZ *= 0.3;
-            }
-
-            if ((this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally) {
-                AxisAlignedBB bb = this.boundingBox.clone().offset(this.motionX, this.motionY, this.motionZ);
-                Block[] blocks = this.level.getCollisionBlocks(bb);
-
-                boolean jump = false;
-                boolean step = true;
-
-                for (Block b : blocks) {
-                    AxisAlignedBB blockBB = b.getBoundingBox();
-                    if (blockBB == null || b.canPassThrough())
-                        continue;
-
-                    double diffY = blockBB.maxY - this.boundingBox.minY;
-                    if (diffY < getJumpHeight()) {
-                        jump = true;
+                if (swim != 0) {
+                    if (this.level.rand.nextFloat() < 0.8) {
+                        this.motionY = Math.min(0.15, this.motionY + (0.2 * swim));
                     }
 
-                    if (step)
-                        step = diffY <= getStepHeight();
+                    this.motionX *= 0.3;
+                    this.motionZ *= 0.3;
                 }
 
-                if (jump && !step) {
-                    this.jump();
+                this.move(this.motionX + moveMotionX, this.motionY, this.motionZ + moveMotionZ);
+//                MainLogger.getLogger().info("moving to: "+new Vector3(this.motionX + moveMotionX, this.motionY, this.motionZ + moveMotionZ));
+//                MainLogger.getLogger().info("motX: "+moveMotionX+"  motZ: "+moveMotionZ);
+
+                if ((moveMotionX != 0 || moveMotionZ != 0 || this.motionX != 0 || this.motionZ != 0) && this.isCollidedHorizontally) {
+                    AxisAlignedBB bb = this.boundingBox.clone().offset(this.motionX + moveMotionX, this.motionY, this.motionZ + moveMotionZ);
+                    Block[] blocks = this.level.getCollisionBlocks(bb);
+
+                    boolean jump = false;
+                    boolean step = true;
+
+                    for (Block b : blocks) {
+                        AxisAlignedBB blockBB = b.getBoundingBox();
+                        if (blockBB == null || b.canPassThrough())
+                            continue;
+
+                        double diffY = blockBB.maxY - this.boundingBox.minY;
+                        if (diffY < getJumpHeight()) {
+                            jump = true;
+                        }
+
+                        if (step)
+                            step = diffY <= getStepHeight();
+                    }
+
+                    if (jump && !step) {
+                        this.jump();
+                    }
+                }
+
+//                this.checkGround();
+                if (!this.onGround && swim == 0) {
+                    this.motionY -= this.getGravity();
+                    //Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
+                    hasUpdate = true;
+                } else {
+                    this.isKnockback = false;
                 }
             }
-
-            this.move(this.motionX, this.motionY, this.motionZ);
-
-            this.checkGround();
-            if (!this.onGround && swim == 0) {
-                this.motionY -= this.getGravity();
-                //Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
-                hasUpdate = true;
-            } else {
-                this.isKnockback = false;
-            }
+        } finally {
+            ActaeonTimings.MOVE_TICK.stopTiming();
         }
 
 
@@ -231,36 +284,65 @@ abstract public class MovingEntity extends EntityCreature {
         return 100.0;
     }
 
-    public void setTarget(Vector3 vec, String identifier) {
-        this.setTarget(vec, identifier, false);
+    public void setTarget(EntityTarget target) {
+        this.setTarget(target, false);
     }
 
-    public void setTarget(Vector3 vec, String identifier, boolean forceSearch) {
-        if (identifier == null) return;
-        if (Objects.equals(this.target, vec))
+    public void setTarget(EntityTarget target, boolean forceSearch) {
+        if (target.getIdentifier() == null) return;
+        if (this.target != null && Objects.equals(this.target.getTarget(), target.getTarget()))
             return;
 
-        if (forceSearch || !this.hasSetTarget() || identifier.equals(this.targetSetter)) {
-            this.target = vec;
-
-            this.targetSetter = identifier;
+        if (forceSearch || !this.hasSetTarget() || target.getIdentifier().equals(this.target.getIdentifier())) {
+            this.target = target;
         }
 
         if (this.hasSetTarget() && (forceSearch || !this.route.hasRoute())) {
             this.route.forceStop();
+
+            if (!(this.route instanceof AdvancedRouteFinder)) {
+                this.setRouteFinder(AdvancedRouteFinder.class);
+            }
+
             this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
+
+            ActaeonTimings.PATH_SEARCH.startTiming();
             this.route.search();
+            ActaeonTimings.PATH_SEARCH.stopTiming();
 			/*if(this.route.isSearching()) this.route.research();
 			else this.route.search();*/
         }
     }
 
+    public void setDirectTarget(EntityTarget target) {
+        this.target = target;
+
+        this.setRouteFinder(SimpleRouteFinder.class);
+
+        this.route.setPositions(this.level, this.clone(), getTarget(), this.boundingBox.clone());
+        this.route.search();
+    }
+
     public Vector3 getRealTarget() {
-        return this.target;
+        if (this.target == null) {
+            return null;
+        }
+
+        return this.target.getTarget();
     }
 
     public Vector3 getTarget() {
-        return new Vector3(this.target.x, this.target.y, this.target.z);
+        if (this.target == null) {
+            return null;
+        }
+
+        Vector3 v = this.target.getTarget();
+
+        if (v == null) {
+            return null;
+        }
+
+        return new Vector3(v.x, v.y, v.z);
     }
 
     /**
@@ -268,7 +350,7 @@ abstract public class MovingEntity extends EntityCreature {
      * Entity will try to move to position where target exists
      */
     public boolean hasFollowingTarget() {
-        return this.route.getDestination() != null && this.target != null && this.distanceSquared(this.target) < this.getRange();
+        return this.route.getDestination() != null && this.target != null && this.distanceSquared(this.target.getTarget()) < this.getRange();
     }
 
     /**
@@ -277,31 +359,37 @@ abstract public class MovingEntity extends EntityCreature {
      * If following distance of target is too far to follow or cannot reach, set target will be the next following target
      */
     public boolean hasSetTarget() {
-        return this.target != null && this.distanceSquared(this.target) < this.getRange();
+        return this.target != null && this.target.getTarget() != null && this.distanceSquared(this.target.getTarget()) < this.getRange();
     }
 
     @Override
     protected void checkGroundState(double movX, double movY, double movZ, double dx, double dy, double dz) {
         this.isCollidedVertically = movY != dy;
-        this.isCollidedHorizontally = (movX != dx || movZ != dz);
+
+        this.isCollidedX = movX != dx;
+        this.isCollidedZ = movZ != dz;
+
+        this.isCollidedHorizontally = this.isCollidedX || this.isCollidedZ;
+
         this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
 
-        // this.onGround = (movY != dy && movY < 0);
+        this.onGround = (movY != dy && movY < 0);
+
         // onGround 는 onUpdate 에서 확인
     }
 
-    private void checkGround() {
-        AxisAlignedBB[] list = this.level.getCollisionCubes(this, this.level.getTickRate() > 1 ? this.boundingBox.getOffsetBoundingBox(0, -1, 0) : this.boundingBox.addCoord(0, -1, 0), false);
-
-        double maxY = 0;
-        for (AxisAlignedBB bb : list) {
-            if (bb.maxY > maxY) {
-                maxY = bb.maxY;
-            }
-        }
-
-        this.onGround = (maxY == this.boundingBox.minY);
-    }
+//    private void checkGround() {
+//        AxisAlignedBB[] list = this.level.getCollisionCubes(this, this.level.getTickRate() > 1 ? this.boundingBox.getOffsetBoundingBox(0, -1, 0) : this.boundingBox.addCoord(0, -1, 0), false);
+//
+//        double maxY = 0;
+//        for (AxisAlignedBB bb : list) {
+//            if (bb.maxY > maxY) {
+//                maxY = bb.maxY;
+//            }
+//        }
+//
+//        this.onGround = (maxY == this.boundingBox.minY);
+//    }
 
     @Override
     public void setHealth(float health) {
@@ -366,14 +454,7 @@ abstract public class MovingEntity extends EntityCreature {
         return task;
     }
 
-    public boolean isLookAtFront() {
-        return lookAtFront;
-    }
-
-    public void setLookAtFront(boolean lookAtFront) {
-        this.lookAtFront = lookAtFront;
-    }
-
+    @Deprecated
     public void lookAt(Vector3 pos) {
         Vector3 diff = pos.subtract(this.add(0, getEyeHeight()));
 
@@ -393,8 +474,41 @@ abstract public class MovingEntity extends EntityCreature {
         return false;
     }*/
 
+    public double maxTargetDistance() {
+        if (this.target != null) {
+            return this.target.getMaxDistance();
+        }
+
+        return 2;
+    }
+
     public int getAge() {
         return age;
+    }
+
+    public void setRouteFinder(Class<? extends RouteFinder> finder) {
+        if (this.route != null) {
+            this.route.forceStop();
+        }
+
+        this.route = this.routeFinders.get(finder);
+    }
+
+    public void registerRouteFinder(RouteFinder finder) {
+        this.routeFinders.put(finder.getClass(), finder);
+    }
+
+    @Override
+    public float getMovementSpeed() {
+        return super.getMovementSpeed() * this.target.getSpeed();
+    }
+
+    public int getHorizontalLookSpeed() {
+        return 10;
+    }
+
+    public int getVerticalLookSpeed() {
+        return 40;
     }
 }
 

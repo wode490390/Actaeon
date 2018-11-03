@@ -9,19 +9,13 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.DyeColor;
-import com.google.common.collect.Sets;
 import me.onebone.actaeon.entity.EntityTameable;
-import me.onebone.actaeon.hook.AnimalMateHook;
-import me.onebone.actaeon.hook.FollowItemAI;
-import me.onebone.actaeon.hook.FollowParentHook;
-import me.onebone.actaeon.hook.WanderHook;
-
-import java.util.Set;
+import me.onebone.actaeon.hook.*;
 
 public class Wolf extends EntityTameable {
 
     public static final int NETWORK_ID = 14;
-    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.BONE));
+//    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.BONE));
 
     protected DyeColor collarColor;
 
@@ -29,10 +23,16 @@ public class Wolf extends EntityTameable {
         super(chunk, nbt);
 
         setMaxHealth(isTamed() ? 20 : 8);
-        this.addHook(1, new AnimalMateHook(this));
-        this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
-        this.addHook(3, new FollowParentHook(this));
+        setMovementSpeed(0.23f);
+
+        this.sitHook = new SitHook(this);
+
+        this.addHook(1, this.sitHook);
+        this.addHook(2, new AnimalMateHook(this));
+//        this.addHook(3, new FollowItemAI(this, 10, FOLLOW_ITEMS));
         this.addHook(4, new WanderHook(this));
+        this.addHook(5, new WatchClosestHook(this, Player.class, 6));
+        this.addHook(6, new LookIdleHook(this));
 
         this.setAngry(namedTag.getBoolean("Angry"));
         this.setCollarColor(namedTag.getByte("CollarColor"));
@@ -116,6 +116,7 @@ public class Wolf extends EntityTameable {
                 setSitting(!isSitting());
             }
         }
+
         return false;
     }
 

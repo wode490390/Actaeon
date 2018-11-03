@@ -61,6 +61,8 @@ abstract public class Animal extends EntityAgeable {
         pk.speedY = (float) this.motionY;
         pk.speedZ = (float) this.motionZ;
         pk.metadata = this.dataProperties;
+        pk.yaw = (float) this.yaw;
+        pk.pitch = (float) this.pitch;
         player.dataPacket(pk);
 
         UpdateAttributesPacket pk0 = new UpdateAttributesPacket();

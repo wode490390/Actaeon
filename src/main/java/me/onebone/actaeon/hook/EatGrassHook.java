@@ -1,10 +1,8 @@
 package me.onebone.actaeon.hook;
 
 import cn.nukkit.Server;
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockDirt;
-import cn.nukkit.block.BlockGrass;
-import cn.nukkit.block.BlockTallGrass;
+import cn.nukkit.block.*;
+import cn.nukkit.event.entity.EntityBlockChangeEvent;
 import cn.nukkit.level.particle.DestroyBlockParticle;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import me.onebone.actaeon.entity.animal.Animal;
@@ -20,7 +18,7 @@ public class EatGrassHook extends MovingEntityHook {
     public EatGrassHook(Animal entity) {
         super(entity);
         this.animal = entity;
-        setCompatibility(0b111);
+        setCompatibility(FLAG_MOVEMENT | FLAG_ROTATION | FLAG_BUSY);
     }
 
     @Override
@@ -63,11 +61,16 @@ public class EatGrassHook extends MovingEntityHook {
         this.timer = Math.max(0, this.timer - 1);
 
         if (this.timer == 4) {
-            Block block = this.entity.getLevelBlock();
+            Block block = this.entity.floor().getLevelBlock();
 
             if (block instanceof BlockTallGrass) {
                 if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                    this.entity.level.useBreakOn(block);
+                    EntityBlockChangeEvent e = new EntityBlockChangeEvent(this.entity, block, new BlockAir());
+                    this.entity.getServer().getPluginManager().callEvent(e);
+
+                    if (!e.isCancelled()) {
+                        this.entity.level.useBreakOn(block);
+                    }
                 }
 
                 this.animal.eatGrass();
@@ -76,13 +79,24 @@ public class EatGrassHook extends MovingEntityHook {
 
                 if (block.getId() == Block.GRASS) {
                     if (this.entity.level.getGameRules().getBoolean("mobGriefing")) {
-                        this.entity.level.addParticle(new DestroyBlockParticle(block, block));
-                        this.entity.level.setBlock(block, new BlockDirt(), true, false);
+
+                        EntityBlockChangeEvent e = new EntityBlockChangeEvent(this.entity, block, new BlockDirt());
+                        this.entity.getServer().getPluginManager().callEvent(e);
+
+                        if (!e.isCancelled()) {
+                            this.entity.level.addParticle(new DestroyBlockParticle(block, block));
+                            this.entity.level.setBlock(block, e.getTo(), true, false);
+                        }
                     }
 
                     this.animal.eatGrass();
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isInterruptible() {
+        return false;
     }
 }

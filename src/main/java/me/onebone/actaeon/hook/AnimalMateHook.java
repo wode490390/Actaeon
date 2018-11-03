@@ -8,6 +8,7 @@ import cn.nukkit.math.Vector3;
 import me.onebone.actaeon.Actaeon;
 import me.onebone.actaeon.entity.EntityAgeable;
 import me.onebone.actaeon.entity.animal.Animal;
+import me.onebone.actaeon.target.EntityTarget;
 
 import java.util.Random;
 
@@ -20,11 +21,13 @@ public class AnimalMateHook extends MovingEntityHook {
     private Animal target;
 
     private int spawnBabyDelay;
+    private boolean close = false;
+    private EntityTarget pathTarget;
 
     public AnimalMateHook(Animal entity) {
         super(entity);
         this.animal = entity;
-        this.setCompatibility(0b11);
+        this.setCompatibility(FLAG_MOVEMENT | FLAG_ROTATION);
     }
 
     @Override
@@ -33,7 +36,13 @@ public class AnimalMateHook extends MovingEntityHook {
             return false;
 
         this.target = getNearby();
-        return target != null;
+
+        if (this.target != null) {
+            this.pathTarget = EntityTarget.builder().target(this.target).identifier(this.target.getName()).build();
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -44,12 +53,21 @@ public class AnimalMateHook extends MovingEntityHook {
     @Override
     public void reset() {
         this.target = null;
+        this.close = false;
         this.spawnBabyDelay = 60;
     }
 
     @Override
     public void onUpdate(int tick) {
-        this.animal.setTarget(this.target, target.getName(), true);
+        if (!this.close && this.animal.getBoundingBox().intersectsWith(this.target.getBoundingBox())) {
+            this.close = true;
+        }
+
+        if (this.close) {
+            this.animal.setDirectTarget(this.pathTarget);
+        } else if (tick % 5 == 0) {
+            this.animal.setTarget(this.pathTarget, true);
+        }
 
         if (spawnBabyDelay++ >= 60 && animal.distanceSquared(target) < 9) {
             spawnBaby();
@@ -73,7 +91,7 @@ public class AnimalMateHook extends MovingEntityHook {
     }
 
     private void spawnBaby() {
-        EntityAgeable baby = this.animal.createBaby();
+        EntityAgeable baby = this.animal.createBaby(this.target);
         if (baby == null) {
             return;
         }

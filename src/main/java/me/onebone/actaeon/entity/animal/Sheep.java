@@ -1,18 +1,21 @@
 package me.onebone.actaeon.entity.animal;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.ByteEntityData;
+import cn.nukkit.inventory.Recipe;
+import cn.nukkit.inventory.ShapelessRecipe;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.DyeColor;
 import com.google.common.collect.Sets;
-import me.onebone.actaeon.hook.AnimalMateHook;
-import me.onebone.actaeon.hook.FollowItemAI;
-import me.onebone.actaeon.hook.FollowParentHook;
-import me.onebone.actaeon.hook.WanderHook;
+import me.onebone.actaeon.entity.EntityAgeable;
+import me.onebone.actaeon.hook.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -29,10 +32,17 @@ public class Sheep extends Animal {
             namedTag.putByte("Color", getRandomSheepColor().getWoolData());
         }
 
+        this.setDataProperty(new ByteEntityData(DATA_COLOUR, namedTag.getByte("Color")));
+
+        this.setDataFlag(DATA_FLAGS, DATA_FLAG_SHEARED, namedTag.getBoolean("Sheared"));
+
         this.addHook(1, new AnimalMateHook(this));
         this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
         this.addHook(3, new FollowParentHook(this));
-        this.addHook(4, new WanderHook(this));
+        this.addHook(4, new EatGrassHook(this));
+        this.addHook(5, new WanderHook(this));
+        this.addHook(6, new WatchClosestHook(this, Player.class, 6));
+        this.addHook(7, new LookIdleHook(this));
     }
 
     @Override
@@ -70,7 +80,7 @@ public class Sheep extends Animal {
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.WOOL, 0, new Random().nextInt(2) + 1)};
+        return new Item[]{Item.get(Item.WOOL, getColor().getWoolData(), 1)};
     }
 
     @Override
@@ -89,6 +99,7 @@ public class Sheep extends Animal {
 
     public void setColor(int color) {
         this.setDataProperty(new ByteEntityData(DATA_COLOUR, color));
+        this.namedTag.putByte("Color", color);
     }
 
     public DyeColor getColor() {
@@ -97,6 +108,7 @@ public class Sheep extends Animal {
 
     public void setSheared(boolean sheared) {
         this.setDataFlag(DATA_FLAGS, DATA_FLAG_SHEARED, sheared);
+        this.namedTag.putBoolean("Sheared", sheared);
     }
 
     public boolean isSheared() {
@@ -142,6 +154,44 @@ public class Sheep extends Animal {
 
         if (this.isBaby()) {
             addGrowth(60);
+        }
+    }
+
+    @Override
+    public EntityAgeable createBaby(EntityAgeable mother) {
+        Entity baby = super.createBaby(mother);
+
+        if (!(baby instanceof Sheep) || !(mother instanceof Sheep)) {
+            return null;
+        }
+
+        ((Sheep) baby).setColor(getColorFromParents(this, (Sheep) mother));
+
+        return (Sheep) baby;
+    }
+
+    private DyeColor getColorFromParents(Sheep father, Sheep mother) {
+        List<DyeColor> colors = Arrays.asList(father.getColor(), mother.getColor());
+
+        for (Recipe recipe : getServer().getCraftingManager().recipes.values()) {
+            if (!(recipe instanceof ShapelessRecipe)) {
+                continue;
+            }
+
+            ShapelessRecipe rec = (ShapelessRecipe) recipe;
+            List<Item> ingredients = rec.getIngredientList();
+
+            if (ingredients.size() != 2) {
+                continue;
+            }
+
+
+        }
+
+        if (this.level.rand.nextBoolean()) {
+            return father.getColor();
+        } else {
+            return mother.getColor();
         }
     }
 }

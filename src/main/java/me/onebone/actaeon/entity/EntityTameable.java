@@ -9,6 +9,7 @@ import cn.nukkit.level.particle.Particle;
 import cn.nukkit.level.particle.SmokeParticle;
 import cn.nukkit.nbt.tag.CompoundTag;
 import me.onebone.actaeon.entity.animal.Animal;
+import me.onebone.actaeon.hook.SitHook;
 
 import java.util.Random;
 
@@ -20,6 +21,8 @@ public abstract class EntityTameable extends Animal implements EntityOwnable {
     protected String owner;
     protected Player ownerInstance;
 
+    protected SitHook sitHook;
+
     public EntityTameable(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
@@ -28,6 +31,10 @@ public abstract class EntityTameable extends Animal implements EntityOwnable {
 
         if (owner != null && !owner.isEmpty()) {
             this.setTamed(true);
+        }
+
+        if (sitHook != null) {
+
         }
     }
 

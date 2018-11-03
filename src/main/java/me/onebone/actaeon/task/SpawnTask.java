@@ -53,25 +53,25 @@ public class SpawnTask implements Runnable {
     }
 
     private void prepareSpawnerClasses() {
-        entitySpawners.add(new BatSpawner(this, this.pluginConfig));
-        entitySpawners.add(new BlazeSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new BatSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new BlazeSpawner(this, this.pluginConfig));
         entitySpawners.add(new ChickenSpawner(this, this.pluginConfig));
         entitySpawners.add(new CowSpawner(this, this.pluginConfig));
-        entitySpawners.add(new CreeperSpawner(this, this.pluginConfig));
-        entitySpawners.add(new EndermanSpawner(this, this.pluginConfig));
-        entitySpawners.add(new GhastSpawner(this, this.pluginConfig));
-        entitySpawners.add(new HorseSpawner(this, this.pluginConfig));
-        entitySpawners.add(new HuskSpawner(this, this.pluginConfig));
-        entitySpawners.add(new MooshroomSpawner(this, this.pluginConfig));
-        entitySpawners.add(new OcelotSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new CreeperSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new EndermanSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new GhastSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new HorseSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new HuskSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new MooshroomSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new OcelotSpawner(this, this.pluginConfig));
         entitySpawners.add(new PigSpawner(this, this.pluginConfig));
-        entitySpawners.add(new PolarBearSpawner(this, this.pluginConfig));
-        entitySpawners.add(new RabbitSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new PolarBearSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new RabbitSpawner(this, this.pluginConfig));
         entitySpawners.add(new SheepSpawner(this, this.pluginConfig));
-        entitySpawners.add(new SkeletonSpawner(this, this.pluginConfig));
-        entitySpawners.add(new SpiderSpawner(this, this.pluginConfig));
-        entitySpawners.add(new StraySpawner(this, this.pluginConfig));
-        entitySpawners.add(new WolfSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new SkeletonSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new SpiderSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new StraySpawner(this, this.pluginConfig));
+//        entitySpawners.add(new WolfSpawner(this, this.pluginConfig));
         entitySpawners.add(new ZombieSpawner(this, this.pluginConfig));
     }
 

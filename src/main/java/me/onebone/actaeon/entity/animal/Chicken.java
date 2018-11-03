@@ -1,5 +1,6 @@
 package me.onebone.actaeon.entity.animal;
 
+import cn.nukkit.Player;
 import cn.nukkit.entity.EntityAgeable;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
@@ -24,6 +25,8 @@ public class Chicken extends Animal implements EntityAgeable, Fallable {
         this.addHook(2, new FollowItemAI(this, 10, FOLLOW_ITEMS));
         this.addHook(3, new FollowParentHook(this));
         this.addHook(4, new WanderHook(this));
+        this.addHook(5, new WatchClosestHook(this, Player.class, 6));
+        this.addHook(6, new LookIdleHook(this));
 
         setMaxHealth(4);
     }

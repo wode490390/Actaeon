@@ -18,7 +18,7 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
     public EntityAgeable(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
-        this.growingAge = namedTag.getInt("Age");
+        this.setGrowingAge(namedTag.getInt("Age"));
         this.forcedAge = namedTag.getInt("ForcedAge");
     }
 
@@ -88,17 +88,23 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
     public void setGrowingAge(int age) {
         this.setDataFlag(DATA_FLAGS, DATA_FLAG_BABY, age < 0);
         this.growingAge = age;
-        this.updateScale(isBaby());
+        this.updateScale(age);
     }
 
     protected void onGrowingAdult() {
     }
 
-    public void updateScale(boolean baby) {
-        this.setDataProperty(new FloatEntityData(DATA_SCALE, baby ? 0.5f : 1));
+    public void updateScale(int age) {
+        float scale = 1;
+
+        if (age < 0) {
+            scale = Math.max(0.5f, (float) (((-age) - 24000) * 100) / 24000);
+        }
+
+        this.setDataProperty(new FloatEntityData(DATA_SCALE, scale));
     }
 
-    public EntityAgeable createBaby() {
+    public EntityAgeable createBaby(EntityAgeable mother) {
         Entity baby = Actaeon.create(getNetworkId(), this);
         return baby instanceof EntityAgeable ? (EntityAgeable) baby : null;
     }
@@ -109,5 +115,16 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
 
         this.namedTag.putInt("Age", getGrowingAge());
         this.namedTag.putInt("ForcedAge", forcedAge);
+    }
+
+    @Override
+    public float getMovementSpeed() {
+        float speed = super.getMovementSpeed();
+
+        if (this.isBaby()) {
+            speed /= 0.5f;
+        }
+
+        return speed;
     }
 }

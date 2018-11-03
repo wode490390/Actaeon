@@ -4,6 +4,7 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.math.AxisAlignedBB;
 import me.onebone.actaeon.entity.EntityAgeable;
 import me.onebone.actaeon.entity.animal.Animal;
+import me.onebone.actaeon.target.EntityTarget;
 
 /**
  * @author CreeperFace
@@ -25,8 +26,12 @@ public class FollowParentHook extends MovingEntityHook {
             return false;
         }
 
-        this.parent = findParent();
-        return this.parent != null;
+        if (this.parent == null || !this.parent.isAlive()) {
+            this.parent = findParent();
+        }
+
+        double d;
+        return this.parent != null && (d = this.parent.distanceSquared(this.ageable)) >= 9 && d < 256;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class FollowParentHook extends MovingEntityHook {
         if (tick % 10 != 0)
             return;
 
-        this.ageable.setTarget(parent, parent.getName(), true);
+        this.ageable.setTarget(EntityTarget.builder().target(parent).identifier(parent.getName()).build(), true);
     }
 
     private EntityAgeable findParent() {
@@ -50,12 +55,17 @@ public class FollowParentHook extends MovingEntityHook {
 
         for (Entity entity : ageable.getLevel().getNearbyEntities(bb, ageable)) {
             double l;
-            if (entity.getClass() == ageable.getClass() && entity.isAlive() && ((EntityAgeable) entity).getGrowingAge() > 0 && (l = ageable.distanceSquared(entity)) < dist) {
+            if (entity.getClass().isInstance(ageable) && entity.isAlive() && ((EntityAgeable) entity).getGrowingAge() > 0 && (l = ageable.distanceSquared(entity)) < dist) {
                 target = (Animal) entity;
                 dist = l;
             }
         }
 
         return target;
+    }
+
+    @Override
+    public void reset() {
+        this.parent = null;
     }
 }
