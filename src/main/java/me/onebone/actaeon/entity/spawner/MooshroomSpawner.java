@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class MooshroomSpawner extends AbstractEntitySpawner {
 
     public MooshroomSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

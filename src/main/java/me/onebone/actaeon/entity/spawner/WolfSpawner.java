@@ -19,7 +19,7 @@ public class WolfSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public WolfSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {

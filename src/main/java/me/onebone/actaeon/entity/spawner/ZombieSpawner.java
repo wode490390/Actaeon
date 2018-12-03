@@ -19,7 +19,7 @@ public class ZombieSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public ZombieSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

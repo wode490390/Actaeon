@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class BlazeSpawner extends AbstractEntitySpawner {
 
     public BlazeSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

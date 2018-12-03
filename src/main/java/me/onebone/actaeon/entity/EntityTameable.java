@@ -1,6 +1,7 @@
 package me.onebone.actaeon.entity;
 
 import cn.nukkit.Player;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityOwnable;
 import cn.nukkit.entity.data.LongEntityData;
 import cn.nukkit.level.format.FullChunk;
@@ -43,7 +44,15 @@ public abstract class EntityTameable extends Animal implements EntityOwnable {
     }
 
     public void setTamed(boolean tamed) {
+        setTamed(tamed, null);
+    }
+
+    public void setTamed(boolean tamed, Entity owner) {
         setDataFlag(DATA_FLAGS, DATA_FLAG_TAMED, tamed);
+
+        if (owner != null) {
+            setDataProperty(new LongEntityData(DATA_OWNER_EID, owner.getId()));
+        }
     }
 
     public boolean isSitting() {

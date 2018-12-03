@@ -20,7 +20,7 @@ public class OcelotSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public OcelotSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {

@@ -4,7 +4,6 @@ import cn.nukkit.IPlayer;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
-import cn.nukkit.utils.Config;
 import me.onebone.actaeon.entity.animal.Cow;
 import me.onebone.actaeon.task.SpawnTask;
 
@@ -18,15 +17,15 @@ public class CowSpawner extends AbstractEntitySpawner {
     /**
      * @param spawnTask
      */
-    public CowSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+    public CowSpawner(SpawnTask spawnTask) {
+        super(spawnTask, 1, 3);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
 
         int blockId = level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z);
-        int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
+//        int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
 
         if (Block.transparent[blockId]) { // only spawns on opaque blocks
             result = SpawnResult.WRONG_BLOCK;
@@ -35,7 +34,7 @@ public class CowSpawner extends AbstractEntitySpawner {
         } else if (pos.y > 127 || pos.y < 1 || level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z) == Block.AIR) { // cannot spawn on AIR block
             result = SpawnResult.POSITION_MISMATCH;
         } else {
-            this.spawnTask.createEntity(getEntityName(), pos.add(0, 2.3, 0));
+            summon(pos.add(0, 2.3, 0));
         }
 
         return result;

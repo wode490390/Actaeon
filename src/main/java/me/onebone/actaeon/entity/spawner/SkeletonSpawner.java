@@ -19,7 +19,7 @@ public class SkeletonSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public SkeletonSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

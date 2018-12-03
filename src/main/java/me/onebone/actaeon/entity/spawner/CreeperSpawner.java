@@ -19,7 +19,7 @@ public class CreeperSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public CreeperSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {

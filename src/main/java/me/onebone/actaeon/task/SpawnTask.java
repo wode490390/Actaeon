@@ -7,6 +7,7 @@ import cn.nukkit.entity.mob.*;
 import cn.nukkit.entity.passive.*;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
 import me.onebone.actaeon.Actaeon;
 import me.onebone.actaeon.entity.spawner.*;
@@ -30,9 +31,14 @@ public class SpawnTask implements Runnable {
 
     private Actaeon plugin = null;
 
+    private int spawnRadius;
+
     public SpawnTask(Actaeon plugin) {
         this.pluginConfig = plugin.getConfig();
         this.plugin = plugin;
+
+//        spawnRadius = (int) Math.pow(pluginConfig.getInt("spawn-radius", 3), 2);
+        spawnRadius = pluginConfig.getInt("spawn-radius", 3);
 
         prepareMaxSpawns();
         try {
@@ -53,10 +59,12 @@ public class SpawnTask implements Runnable {
     }
 
     private void prepareSpawnerClasses() {
+        AbstractEntitySpawner.initConfig(this.pluginConfig);
+
 //        entitySpawners.add(new BatSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new BlazeSpawner(this, this.pluginConfig));
-        entitySpawners.add(new ChickenSpawner(this, this.pluginConfig));
-        entitySpawners.add(new CowSpawner(this, this.pluginConfig));
+        entitySpawners.add(new ChickenSpawner(this));
+        entitySpawners.add(new CowSpawner(this));
 //        entitySpawners.add(new CreeperSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new EndermanSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new GhastSpawner(this, this.pluginConfig));
@@ -64,15 +72,15 @@ public class SpawnTask implements Runnable {
 //        entitySpawners.add(new HuskSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new MooshroomSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new OcelotSpawner(this, this.pluginConfig));
-        entitySpawners.add(new PigSpawner(this, this.pluginConfig));
+        entitySpawners.add(new PigSpawner(this));
 //        entitySpawners.add(new PolarBearSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new RabbitSpawner(this, this.pluginConfig));
-        entitySpawners.add(new SheepSpawner(this, this.pluginConfig));
+        entitySpawners.add(new SheepSpawner(this));
 //        entitySpawners.add(new SkeletonSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new SpiderSpawner(this, this.pluginConfig));
 //        entitySpawners.add(new StraySpawner(this, this.pluginConfig));
 //        entitySpawners.add(new WolfSpawner(this, this.pluginConfig));
-        entitySpawners.add(new ZombieSpawner(this, this.pluginConfig));
+//        entitySpawners.add(new ZombieSpawner(this, this.pluginConfig));
     }
 
     private void prepareMaxSpawns() {
@@ -98,18 +106,34 @@ public class SpawnTask implements Runnable {
 
     }
 
-    public boolean entitySpawnAllowed(Level level, int networkId, String entityName) {
-        int count = countEntity(level, networkId);
+    public boolean entitySpawnAllowed(Level level, int networkId, Vector3 pos) {
+        int count = countEntity(level, networkId, pos, spawnRadius);
         return count < maxSpawns.getOrDefault(networkId, 0);
     }
 
-    private int countEntity(Level level, int networkId) {
+    private int countEntity(Level level, int networkId, Vector3 pos, int radius) {
         int count = 0;
-        for (Entity entity : level.getEntities()) {
-            if (entity.isAlive() && entity.getNetworkId() == networkId) {
-                count++;
+
+        int minX = (pos.getFloorX() >> 4) - radius;
+        int minZ = (pos.getFloorZ() >> 4) - radius;
+
+        int maxX = (pos.getFloorX() >> 4) + radius;
+        int maxZ = (pos.getFloorZ() >> 4) + radius;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                if (level.isChunkLoaded(x, z)) {
+                    Map<Long, Entity> entities = level.getChunkEntities(x, z);
+
+                    for (Entity entity : entities.values()) {
+                        if (entity.isAlive() && entity.getNetworkId() == networkId && pos.distanceSquared(entity) < radius) {
+                            count++;
+                        }
+                    }
+                }
             }
         }
+
         return count;
     }
 

@@ -22,17 +22,37 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
 
     protected Server server;
 
-    protected List<String> disabledSpawnWorlds = new ArrayList<>();
+    protected static List<String> disabledSpawnWorlds = new ArrayList<>();
 
-    public AbstractEntitySpawner(SpawnTask spawnTask, Config pluginConfig) {
+    private int minCount;
+    private int maxCount;
+
+    public AbstractEntitySpawner(SpawnTask spawnTask) {
+        this(spawnTask, 1, 1);
+    }
+
+    public AbstractEntitySpawner(SpawnTask spawnTask, int minCount, int maxCount) {
         this.spawnTask = spawnTask;
         this.server = Server.getInstance();
+        this.minCount = minCount;
+        this.maxCount = maxCount;
+    }
+
+    public static void initConfig(Config pluginConfig) {
         String disabledWorlds = pluginConfig.getString("disabled-worlds");
         if (disabledWorlds != null && !disabledWorlds.trim().isEmpty()) {
             StringTokenizer tokenizer = new StringTokenizer(disabledWorlds, ",");
             while (tokenizer.hasMoreTokens()) {
                 disabledSpawnWorlds.add(tokenizer.nextToken());
             }
+        }
+    }
+
+    protected void summon(Position pos) {
+        int count = Utils.rand(minCount, maxCount);
+
+        for (int i = 0; i < count; i++) {
+            this.spawnTask.createEntity(getEntityName(), pos);
         }
     }
 
@@ -44,6 +64,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     public void spawn(List<Player> onlinePlayers) {
         if (isSpawnAllowedByDifficulty()) {
             SpawnResult lastSpawnResult = null;
+
             for (Player player : onlinePlayers) {
                 if (isWorldSpawnAllowed(player.getLevel())) {
                     lastSpawnResult = spawn(player);
@@ -64,8 +85,8 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
      * @return <code>true</code> when world spawn is allowed
      */
     private boolean isWorldSpawnAllowed(Level level) {
-        for (String worldName : this.disabledSpawnWorlds) {
-            if (level.getName().toLowerCase().equals(worldName.toLowerCase())) {
+        for (String worldName : disabledSpawnWorlds) {
+            if (level.getName().equalsIgnoreCase(worldName)) {
                 return false;
             }
         }
@@ -85,15 +106,13 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
         Position pos = ((Player) iPlayer).getPosition();
         Level level = ((Player) iPlayer).getLevel();
 
-        if (this.spawnTask.entitySpawnAllowed(level, getEntityNetworkId(), getEntityName())) {
+        if (this.spawnTask.entitySpawnAllowed(level, getEntityNetworkId(), iPlayer.getPlayer())) {
             if (pos != null) {
                 // get a random safe position for spawn
                 pos.x += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
                 pos.z += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
                 pos.y = this.spawnTask.getSafeYCoord(level, pos, 3);
-            }
-
-            if (pos == null) {
+            } else {
                 return SpawnResult.POSITION_MISMATCH;
             }
         } else {

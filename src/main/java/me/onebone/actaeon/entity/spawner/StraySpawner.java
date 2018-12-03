@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class StraySpawner extends AbstractEntitySpawner {
 
     public StraySpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

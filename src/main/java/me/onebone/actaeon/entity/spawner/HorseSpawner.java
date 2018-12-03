@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class HorseSpawner extends AbstractEntitySpawner {
 
     public HorseSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

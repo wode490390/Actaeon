@@ -19,7 +19,7 @@ public class RabbitSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public RabbitSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {

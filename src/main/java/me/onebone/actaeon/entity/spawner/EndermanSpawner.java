@@ -20,7 +20,7 @@ public class EndermanSpawner extends AbstractEntitySpawner {
      * @param spawnTask
      */
     public EndermanSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {

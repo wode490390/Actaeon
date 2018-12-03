@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class GhastSpawner extends AbstractEntitySpawner {
 
     public GhastSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package me.onebone.actaeon.entity;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLiquid;
@@ -51,6 +52,7 @@ abstract public class MovingEntity extends EntityCreature {
     public boolean isCollidedZ = false;
 
     public double headYaw;
+    public double lastHeadYaw;
 
     @Getter
     private EntityLookManager lookManager = new EntityLookManager(this);
@@ -64,6 +66,7 @@ abstract public class MovingEntity extends EntityCreature {
         this.setRouteFinder(AdvancedRouteFinder.class);
         //this.route = new SimpleRouteFinder(this);
         this.setImmobile(false);
+        this.setDataFlag(DATA_FLAGS, 46, this.onGround); //collision
     }
 
     public void setBaby(boolean isBaby) {
@@ -373,7 +376,12 @@ abstract public class MovingEntity extends EntityCreature {
 
         this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
 
+        boolean wasOnGround = this.onGround;
         this.onGround = (movY != dy && movY < 0);
+
+        if (wasOnGround != this.onGround) {
+            this.setDataFlag(DATA_FLAGS, 46, this.onGround); //collision
+        }
 
         // onGround 는 onUpdate 에서 확인
     }
@@ -509,6 +517,43 @@ abstract public class MovingEntity extends EntityCreature {
 
     public int getVerticalLookSpeed() {
         return 40;
+    }
+
+    @Override
+    protected void updateMovement() {
+        double diffPosition = (this.x - this.lastX) * (this.x - this.lastX) + (this.y - this.lastY) * (this.y - this.lastY) + (this.z - this.lastZ) * (this.z - this.lastZ);
+        double diffRotation = (this.headYaw - lastHeadYaw) * (this.headYaw - lastHeadYaw) + (this.yaw - this.lastYaw) * (this.yaw - this.lastYaw) + (this.pitch - this.lastPitch) * (this.pitch - this.lastPitch);
+
+        double diffMotion = (this.motionX - this.lastMotionX) * (this.motionX - this.lastMotionX) + (this.motionY - this.lastMotionY) * (this.motionY - this.lastMotionY) + (this.motionZ - this.lastMotionZ) * (this.motionZ - this.lastMotionZ);
+
+        if (diffPosition > 0.0001 || diffRotation > 1.0) { //0.2 ** 2, 1.5 ** 2
+            this.lastX = this.x;
+            this.lastY = this.y;
+            this.lastZ = this.z;
+
+            this.lastYaw = this.yaw;
+            this.lastPitch = this.pitch;
+
+            this.addMovement(this.x, this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.headYaw);
+
+            if (this.linkedEntity instanceof Player) {
+                ((Player) this.linkedEntity).newPosition = this.add(this.getMountedOffset().asVector3());
+                ((Player) this.linkedEntity).processMovement(1);
+            }
+        }
+
+        if (diffMotion > 0.0025 || (diffMotion > 0.0001 && this.getMotion().lengthSquared() <= 0.0001)) { //0.05 ** 2
+            this.lastMotionX = this.motionX;
+            this.lastMotionY = this.motionY;
+            this.lastMotionZ = this.motionZ;
+
+            this.addMotion(this.motionX, this.motionY, this.motionZ);
+        }
+    }
+
+    @Override
+    public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
+        this.level.addEntityMovement(this.chunk.getX(), this.chunk.getZ(), this.id, x, y, z, yaw, pitch, headYaw, this.onGround);
     }
 }
 

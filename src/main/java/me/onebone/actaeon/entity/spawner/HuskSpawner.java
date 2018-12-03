@@ -14,7 +14,7 @@ import me.onebone.actaeon.task.SpawnTask;
 public class HuskSpawner extends AbstractEntitySpawner {
 
     public HuskSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+        super(spawnTask);
     }
 
     @Override

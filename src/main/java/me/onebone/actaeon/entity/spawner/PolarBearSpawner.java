@@ -5,7 +5,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.entity.passive.EntityPolarBear;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
-import cn.nukkit.utils.Config;
 import me.onebone.actaeon.task.SpawnTask;
 
 /**
@@ -13,8 +12,8 @@ import me.onebone.actaeon.task.SpawnTask;
  */
 public class PolarBearSpawner extends AbstractEntitySpawner {
 
-    public PolarBearSpawner(SpawnTask spawnTask, Config pluginConfig) {
-        super(spawnTask, pluginConfig);
+    public PolarBearSpawner(SpawnTask spawnTask) {
+        super(spawnTask);
     }
 
     @Override

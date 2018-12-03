@@ -75,7 +75,9 @@ public class Wolf extends EntityTameable {
 
     public void setCollarColor(int color) {
         this.collarColor = DyeColor.getByWoolData(color);
-        this.setDataProperty(new ByteEntityData(DATA_COLOUR, color));
+
+//        MainLogger.getLogger().info("set collar color: "+color);
+        this.setDataProperty(new ByteEntityData(Entity.DATA_COLOUR, color));
     }
 
     public DyeColor getCollarColor() {
@@ -89,11 +91,12 @@ public class Wolf extends EntityTameable {
                 item.count--;
 
                 if (this.level.rand.nextInt(3) == 0) {
-                    setTamed(true);
+                    setTamed(true, player);
                     setMaxHealth(20);
                     setHealth(20);
                     setSitting(true);
                     addTameParticle(true);
+                    setCollarColor(DyeColor.RED);
                 } else {
                     addTameParticle(false);
                 }
@@ -113,7 +116,10 @@ public class Wolf extends EntityTameable {
             if (isBreedingItem(item)) {
                 //TODO:
             } else {
-                setSitting(!isSitting());
+                boolean sitting = !isSitting();
+
+                setSitting(sitting);
+                this.sitHook.setSitting(sitting);
             }
         }
 
