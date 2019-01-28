@@ -82,8 +82,7 @@ public class FollowItemAI extends MovingEntityHook {
 
     @Override
     public void reset() {
-        this.entity.getRoute().forceStop();
-        this.entity.setTarget(EntityTarget.builder().identifier(this.entity.getName()).build(), true);
+        this.entity.resetMovementPath();
 
         this.holder = null;
         this.delay = 100;

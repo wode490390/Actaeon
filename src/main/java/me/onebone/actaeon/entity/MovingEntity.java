@@ -66,7 +66,7 @@ abstract public class MovingEntity extends EntityCreature {
         this.setRouteFinder(AdvancedRouteFinder.class);
         //this.route = new SimpleRouteFinder(this);
         this.setImmobile(false);
-        this.setDataFlag(DATA_FLAGS, 46, this.onGround); //collision
+//        this.setDataFlag(DATA_FLAGS, 46, this.onGround); //collision
     }
 
     public void setBaby(boolean isBaby) {
@@ -83,7 +83,7 @@ abstract public class MovingEntity extends EntityCreature {
 
     @Override
     protected float getGravity() {
-        return 0.092f;
+        return 0.08f;
     }
 
     public Entity getHate() {
@@ -130,14 +130,6 @@ abstract public class MovingEntity extends EntityCreature {
 //            } else if (this.routeLeading && this.onGround) {
 //                this.motionX = this.motionZ = 0;
 //            }
-
-            double friction = 1 - this.getDrag();
-
-            if (this.onGround && (Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionZ) > 0.00001))
-                friction *= this.getLevel().getBlock(this.temporalVector.setComponents((int) Math.floor(this.x), (int) Math.floor(this.y - 1), (int) Math.floor(this.z) - 1)).getFrictionFactor();
-
-            this.motionX *= friction;
-            this.motionZ *= friction;
 
             if (this.targetFinder != null) this.targetFinder.onUpdate();
 
@@ -236,7 +228,14 @@ abstract public class MovingEntity extends EntityCreature {
                     this.motionZ *= 0.3;
                 }
 
+//                double beforeY = this.y;
+//                double beforeMotY = this.motionY;
+
                 this.move(this.motionX + moveMotionX, this.motionY, this.motionZ + moveMotionZ);
+
+//                if(beforeY - this.y > 0.3) {
+////                    MainLogger.getLogger().info("motion: "+motionY+"motionY diff: "+Math.abs(beforeMotY - this.motionY)+"  Y diff: "+Math.abs(this.y - beforeY)+"   onGround: "+this.onGround);
+//                }
 //                MainLogger.getLogger().info("moving to: "+new Vector3(this.motionX + moveMotionX, this.motionY, this.motionZ + moveMotionZ));
 //                MainLogger.getLogger().info("motX: "+moveMotionX+"  motZ: "+moveMotionZ);
 
@@ -268,12 +267,22 @@ abstract public class MovingEntity extends EntityCreature {
 
 //                this.checkGround();
                 if (!this.onGround && swim == 0) {
+//                    double beforeMot = this.motionY;
                     this.motionY -= this.getGravity();
-                    //Server.getInstance().getLogger().warning(this.getId() + ": 不在地面, 掉落 motionY=" + this.motionY);
+//                    Server.getInstance().getLogger().warning("motionY: " + this.motionY+" before: "+beforeMot+"  diff: "+Math.abs(beforeMot - this.motionY));
                     hasUpdate = true;
                 } else {
                     this.isKnockback = false;
                 }
+
+                double friction = 1 - this.getDrag();
+
+                if (this.onGround && (Math.abs(this.motionX) > 0.00001 || Math.abs(this.motionZ) > 0.00001))
+                    friction *= this.getLevel().getBlock(this.temporalVector.setComponents((int) Math.floor(this.x), (int) Math.floor(this.y - 1), (int) Math.floor(this.z) - 1)).getFrictionFactor();
+
+                this.motionX *= friction;
+                this.motionY *= 1 - getDrag();
+                this.motionZ *= friction;
             }
         } finally {
             ActaeonTimings.MOVE_TICK.stopTiming();
@@ -376,12 +385,9 @@ abstract public class MovingEntity extends EntityCreature {
 
         this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
 
-        boolean wasOnGround = this.onGround;
-        this.onGround = (movY != dy && movY < 0);
+//        boolean wasOnGround = this.onGround;
 
-        if (wasOnGround != this.onGround) {
-            this.setDataFlag(DATA_FLAGS, 46, this.onGround); //collision
-        }
+        this.onGround = (movY != dy && movY < 0);
 
         // onGround 는 onUpdate 에서 확인
     }
@@ -502,6 +508,11 @@ abstract public class MovingEntity extends EntityCreature {
         this.route = this.routeFinders.get(finder);
     }
 
+    public void resetMovementPath() {
+        this.getRoute().forceStop();
+        this.setTarget(EntityTarget.builder().identifier(this.getName()).build(), true);
+    }
+
     public void registerRouteFinder(RouteFinder finder) {
         this.routeFinders.put(finder.getClass(), finder);
     }
@@ -553,7 +564,7 @@ abstract public class MovingEntity extends EntityCreature {
 
     @Override
     public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
-        this.level.addEntityMovement(this.chunk.getX(), this.chunk.getZ(), this.id, x, y, z, yaw, pitch, headYaw, this.onGround);
+        this.level.addEntityMovement(this.chunk.getX(), this.chunk.getZ(), this.id, x, y, z, yaw, pitch, headYaw, false);
     }
 }
 

@@ -12,6 +12,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.DyeColor;
 import com.google.common.collect.Sets;
 import me.onebone.actaeon.entity.EntityAgeable;
+import me.onebone.actaeon.event.PlayerSheepShearEvent;
 import me.onebone.actaeon.hook.*;
 
 import java.util.Arrays;
@@ -125,6 +126,13 @@ public class Sheep extends Animal {
     @Override
     public boolean onInteract(Player player, Item item) {
         if (item.getId() == Item.SHEARS && !isSheared()) {
+            PlayerSheepShearEvent ev = new PlayerSheepShearEvent(player, this);
+            this.server.getPluginManager().callEvent(ev);
+
+            if (ev.isCancelled()) {
+                return false;
+            }
+
             this.setSheared(true);
 
             int count = 1 + this.level.rand.nextInt(3);

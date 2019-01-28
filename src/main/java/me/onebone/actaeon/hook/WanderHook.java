@@ -187,4 +187,9 @@ public class WanderHook extends MovingEntityHook {
 
         return new Vector3(base.getX() + x, y, base.getZ() + z);
     }
+
+    @Override
+    public void reset() {
+        this.entity.resetMovementPath();
+    }
 }

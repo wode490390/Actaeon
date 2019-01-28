@@ -155,5 +155,4 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     }
 
     protected abstract String getLogprefix();
-
 }
