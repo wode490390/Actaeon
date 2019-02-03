@@ -32,7 +32,7 @@ public class AreaRandomTargetFinder extends TargetFinder {
             this.getEntity().setHate(near);
         } else {
             //this.getEntity().getRoute().forceStop();
-            this.getEntity().setTarget(null);
+            this.getEntity().resetMovementPath();
         }
         this.first = false;
     }

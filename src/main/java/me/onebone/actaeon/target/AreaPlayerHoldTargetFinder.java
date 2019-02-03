@@ -33,7 +33,7 @@ public class AreaPlayerHoldTargetFinder extends TargetFinder {
             this.getEntity().setHate(near);
         } else {
             //this.getEntity().getRoute().forceStop();
-            this.getEntity().setTarget(null);
+            this.getEntity().resetMovementPath();
         }
     }
 }

@@ -63,10 +63,10 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     @Override
     public void spawn(List<Player> onlinePlayers) {
         if (isSpawnAllowedByDifficulty()) {
-            SpawnResult lastSpawnResult = null;
+            SpawnResult lastSpawnResult;
 
             for (Player player : onlinePlayers) {
-                if (isWorldSpawnAllowed(player.getLevel())) {
+                if (player.getLevel().getDimension() == Level.DIMENSION_OVERWORLD && isWorldSpawnAllowed(player.getLevel())) {
                     lastSpawnResult = spawn(player);
                     if (lastSpawnResult.equals(SpawnResult.MAX_SPAWN_REACHED)) {
                         break;
