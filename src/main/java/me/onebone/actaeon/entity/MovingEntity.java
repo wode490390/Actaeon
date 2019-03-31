@@ -34,6 +34,7 @@ abstract public class MovingEntity extends EntityCreature {
     private boolean isKnockback = false;
 
     private Map<Class<? extends RouteFinder>, RouteFinder> routeFinders = new HashMap<>();
+    @Getter
     private RouteFinder route;
 
     private TargetFinder targetFinder = null;

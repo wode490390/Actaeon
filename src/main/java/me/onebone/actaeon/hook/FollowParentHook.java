@@ -18,7 +18,9 @@ public class FollowParentHook extends MovingEntityHook {
         super(entity);
 
         this.ageable = entity;
+        setCompatibility(FLAG_MOVEMENT | FLAG_ROTATION);
     }
+
 
     @Override
     public boolean shouldExecute() {

@@ -29,8 +29,7 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
         int growingAge = this.getGrowingAge();
 
         if (growingAge < 0) {
-            ++growingAge;
-            this.setGrowingAge(growingAge);
+            this.setGrowingAge(++growingAge);
 
             if (growingAge == 0) {
                 this.onGrowingAdult();
@@ -54,18 +53,18 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
 
     public void ageUp(int amount, boolean forceAge) {
         int growingAge = this.getGrowingAge();
-        int j = growingAge;
+        int oldAge = growingAge;
         growingAge = growingAge + amount * 20;
 
         if (growingAge > 0) {
             growingAge = 0;
 
-            if (j < 0) {
+            if (oldAge < 0) {
                 this.onGrowingAdult();
             }
         }
 
-        int diff = growingAge - j;
+        int diff = growingAge - oldAge;
         this.setGrowingAge(growingAge);
 
         if (forceAge) {
@@ -98,7 +97,7 @@ public abstract class EntityAgeable extends MovingEntity implements cn.nukkit.en
         float scale = 1;
 
         if (age < 0) {
-            scale = Math.max(0.5f, (float) (((-age) - 24000) * 100) / 24000);
+            scale = Math.max(0.5f, (float) ((age + 24000)) / 24000);
         }
 
         this.setDataProperty(new FloatEntityData(DATA_SCALE, scale));

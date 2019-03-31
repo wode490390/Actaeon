@@ -29,17 +29,17 @@ public class FollowItemAI extends MovingEntityHook {
 
     @Override
     public boolean shouldExecute() {
-        if (delay > 0) {
-            delay--;
-            return false;
-        }
-
         if (this.holder != null && this.holder.isAlive() && this.holder.distanceSquared(this.entity) <= this.range) {
             Item item = this.holder.getInventory().getItemInHand();
 
             if (items.contains(item.getId())) {
                 return true;
             }
+        }
+
+        if (delay > 0) {
+            delay--;
+            return false;
         }
 
         this.holder = findClosestPlayer();
@@ -54,8 +54,9 @@ public class FollowItemAI extends MovingEntityHook {
     @Override
     public void onUpdate(int tick) {
         if (this.holder.distanceSquared(this.entity) < 6.25) {
-            this.entity.getRoute().forceStop();
-        } else {
+            this.entity.resetMovementPath();
+        } else if (tick % 10 == 0 || this.justStarted || !this.entity.getRoute().hasRoute() || this.entity.getRoute().hasArrived()) {
+            super.onUpdate(tick);
             this.entity.setTarget(EntityTarget.builder().target(this.holder).identifier(this.holder.getName()).speed(2f).build(), true);
         }
     }
@@ -81,10 +82,15 @@ public class FollowItemAI extends MovingEntityHook {
     }
 
     @Override
+    public void startExecuting() {
+        super.startExecuting();
+    }
+
+    @Override
     public void reset() {
         this.entity.resetMovementPath();
 
         this.holder = null;
-        this.delay = 100;
+        this.delay = 30;
     }
 }

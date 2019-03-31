@@ -20,6 +20,8 @@ public abstract class MovingEntityHook {
 
     private int compatibility;
 
+    protected boolean justStarted = false;
+
     public MovingEntityHook(MovingEntity entity) {
         this.entity = entity;
     }
@@ -29,6 +31,7 @@ public abstract class MovingEntityHook {
     }
 
     public void onUpdate(int tick) {
+        justStarted = false;
     }
 
     public abstract boolean shouldExecute();
@@ -38,7 +41,7 @@ public abstract class MovingEntityHook {
     }
 
     public void startExecuting() {
-
+        justStarted = true;
     }
 
     public void reset() {

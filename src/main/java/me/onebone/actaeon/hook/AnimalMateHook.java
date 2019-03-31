@@ -27,6 +27,7 @@ public class AnimalMateHook extends MovingEntityHook {
     public AnimalMateHook(Animal entity) {
         super(entity);
         this.animal = entity;
+
         this.setCompatibility(FLAG_MOVEMENT | FLAG_ROTATION);
     }
 
@@ -69,7 +70,7 @@ public class AnimalMateHook extends MovingEntityHook {
             this.animal.setTarget(this.pathTarget, true);
         }
 
-        if (spawnBabyDelay++ >= 60 && animal.distanceSquared(target) < 9) {
+        if (spawnBabyDelay++ >= 60 && animal.distanceSquared(target) < 2) {
             spawnBaby();
         }
     }
