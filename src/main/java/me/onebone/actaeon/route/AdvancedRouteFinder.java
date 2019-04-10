@@ -5,6 +5,7 @@ import cn.nukkit.math.Vector3;
 import me.onebone.actaeon.entity.Climbable;
 import me.onebone.actaeon.entity.Fallable;
 import me.onebone.actaeon.entity.MovingEntity;
+import me.onebone.actaeon.util.ActaeonTimings;
 
 import java.util.*;
 
@@ -24,122 +25,128 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     @Override
     public boolean search() {
-        this.stopRouteFindUntil = System.currentTimeMillis() + 20;
-        this.succeed = false;
-        this.searching = true;
+        ActaeonTimings.PATH_FIND.startTiming();
 
-        if (this.getStart() == null || this.getDestination() == null) {
-            return this.succeed = this.searching = false;
-        }
-
-        this.resetNodes();
-        Node start = new Node(this.getStart().floor());
-        Node endNode = new Node(this.realDestination.floor());
         try {
-            start.f = start.g = 0;
-            open.add(start);
-            this.grid.putNode(start.getVector3(), start);
-            this.grid.putNode(endNode.getVector3(), endNode);
-        } catch (Exception e) {
-            return this.succeed = this.searching = false;
-        }
+            this.stopRouteFindUntil = System.currentTimeMillis() + 20;
+            this.succeed = false;
+            this.searching = true;
 
-        int limit = 500;
-        while (!open.isEmpty() && limit-- > 0) {
-            if (this.forceStop || System.currentTimeMillis() > this.stopRouteFindUntil) {
-                this.resetNodes();
-                this.forceStop = false;
+            if (this.getStart() == null || this.getDestination() == null) {
                 return this.succeed = this.searching = false;
             }
-            Node node = null;
 
-            double f = Double.MAX_VALUE;
+            this.resetNodes();
+            Node start = new Node(this.getStart().floor());
+            Node endNode = new Node(this.realDestination.floor());
             try {
-                for (Node cur : this.open) {
-                    if (cur.f < f && cur.f != -1) {
-                        node = cur;
-                        f = cur.f;
-                    }
-                }
+                start.f = start.g = 0;
+                open.add(start);
+                this.grid.putNode(start.getVector3(), start);
+                this.grid.putNode(endNode.getVector3(), endNode);
             } catch (Exception e) {
                 return this.succeed = this.searching = false;
             }
 
-            if (endNode.equals(node)) {
-                List<Node> nodes = new ArrayList<>();
-                nodes.add(node);
-                Node last = node;
-                while ((node = node.getParent()) != null) {
-                    Node lastNode = nodes.get(nodes.size() - 1);
-                    node.add(0.5, 0, 0.5);
+            int limit = 500;
+            while (!open.isEmpty() && limit-- > 0) {
+                if (this.forceStop || System.currentTimeMillis() > this.stopRouteFindUntil) {
+                    this.resetNodes();
+                    this.forceStop = false;
+                    return this.succeed = this.searching = false;
+                }
+                Node node = null;
 
-                    Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
-                    if (lastNode.getY() == node.getY() && direction.lengthSquared() > 0) {  //Y不改变
-                        WalkableIterator iterator = new WalkableIterator(this, level, lastNode.getVector3(), direction, 0, (int) lastNode.getVector3().distance(node.getVector3()) + 1);
-                        if (iterator.hasNext()) {  //无法直接到达
-                            //level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
-                            nodes.add(last);
+                double f = Double.MAX_VALUE;
+                try {
+                    for (Node cur : this.open) {
+                        if (cur.f < f && cur.f != -1) {
+                            node = cur;
+                            f = cur.f;
+                        }
+                    }
+                } catch (Exception e) {
+                    return this.succeed = this.searching = false;
+                }
+
+                if (endNode.equals(node)) {
+                    List<Node> nodes = new ArrayList<>();
+                    nodes.add(node);
+                    Node last = node;
+                    while ((node = node.getParent()) != null) {
+                        Node lastNode = nodes.get(nodes.size() - 1);
+                        node.add(0.5, 0, 0.5);
+
+                        Vector3 direction = new Vector3(node.getX() - lastNode.getX(), node.getY() - lastNode.getY(), node.getZ() - lastNode.getZ()).normalize().divide(2);
+                        if (lastNode.getY() == node.getY() && direction.lengthSquared() > 0) {  //Y不改变
+                            WalkableIterator iterator = new WalkableIterator(this, level, lastNode.getVector3(), direction, 0, (int) lastNode.getVector3().distance(node.getVector3()) + 1);
+                            if (iterator.hasNext()) {  //无法直接到达
+                                //level.addParticle(new cn.nukkit.level.particle.HappyVillagerParticle(node.getVector3()));
+                                nodes.add(last);
+                                //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3).encode()[0]);
+                                nodes.add(node);
+                            } else {
+                                //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()).encode()[0]);
+                            }
+                        } else {  //Y变了直接放入list
                             //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3).encode()[0]);
                             nodes.add(node);
-                        } else {
-                            //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.AngryVillagerParticle(node.getVector3()).encode()[0]);
                         }
-                    } else {  //Y变了直接放入list
-                        //Server.broadcastPacket(level.getPlayers().values().stream().toArray(Player[]::new), new cn.nukkit.level.particle.CriticalParticle(node.getVector3(), 3).encode()[0]);
-                        nodes.add(node);
+                        last = node;
+                        if (this.forceStop) {
+                            this.resetNodes();
+                            this.forceStop = false;
+                            return this.succeed = this.searching = false;
+                        }
                     }
-                    last = node;
+
+                    Collections.reverse(nodes);
+
+                    nodes.remove(nodes.size() - 1);  //移除原来最终坐标（为整方块中心）
+                    Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
+                    if (highestUnder != null) {
+                        Node realDestinationNode = new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ()));
+                        realDestinationNode.setParent(node);
+                        nodes.add(realDestinationNode);  //添加目的地最终坐标
+                    }
+
+                    nodes.forEach(this::addNode);
+
+                    this.succeed = true;
+                    this.searching = false;
+                    return true;
+                }
+
+                node.closed = true;
+                open.remove(node);
+
+                for (Node neighbor : this.getNeighbors(node)) {
+                    if (neighbor.closed) continue;
+
+                    double tentative_gScore = node.g + neighbor.getVector3().distance(node.getVector3());
+
+                    if (!open.contains(neighbor)) open.add(neighbor);
+                    else if (neighbor.g != -1 && tentative_gScore >= neighbor.g) continue;
+
+                    neighbor.setParent(node);
+                    neighbor.g = tentative_gScore;
+                    neighbor.f = neighbor.g + this.heuristic(neighbor.getVector3(), endNode.getVector3());
+
                     if (this.forceStop) {
                         this.resetNodes();
                         this.forceStop = false;
                         return this.succeed = this.searching = false;
                     }
                 }
-
-                Collections.reverse(nodes);
-
-                nodes.remove(nodes.size() - 1);  //移除原来最终坐标（为整方块中心）
-                Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
-                if (highestUnder != null) {
-                    Node realDestinationNode = new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ()));
-                    realDestinationNode.setParent(node);
-                    nodes.add(realDestinationNode);  //添加目的地最终坐标
-                }
-
-                nodes.forEach(this::addNode);
-
-                this.succeed = true;
-                this.searching = false;
-                return true;
             }
 
-            node.closed = true;
-            open.remove(node);
-
-            for (Node neighbor : this.getNeighbors(node)) {
-                if (neighbor.closed) continue;
-
-                double tentative_gScore = node.g + neighbor.getVector3().distance(node.getVector3());
-
-                if (!open.contains(neighbor)) open.add(neighbor);
-                else if (neighbor.g != -1 && tentative_gScore >= neighbor.g) continue;
-
-                neighbor.setParent(node);
-                neighbor.g = tentative_gScore;
-                neighbor.f = neighbor.g + this.heuristic(neighbor.getVector3(), endNode.getVector3());
-
-                if (this.forceStop) {
-                    this.resetNodes();
-                    this.forceStop = false;
-                    return this.succeed = this.searching = false;
-                }
-            }
+            Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
+            if (highestUnder != null)
+                this.addNode(new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ())));
+            return this.succeed = this.searching = false;
+        } finally {
+            ActaeonTimings.PATH_FIND.stopTiming();
         }
-
-        Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
-        if (highestUnder != null)
-            this.addNode(new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ())));
-        return this.succeed = this.searching = false;
     }
 
     private Set<Node> getNeighbors(Node node) {

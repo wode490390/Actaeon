@@ -8,12 +8,12 @@ import co.aikar.timings.TimingsManager;
  */
 public final class ActaeonTimings {
 
-    public static final Timing PATH_SEARCH;
+    public static final Timing PATH_FIND;
     public static final Timing HOOK_TICK;
     public static final Timing MOVE_TICK;
 
     static {
-        PATH_SEARCH = TimingsManager.getTiming("Actaeon path search");
+        PATH_FIND = TimingsManager.getTiming("Actaeon path find");
         HOOK_TICK = TimingsManager.getTiming("Actaeon hook tick");
         MOVE_TICK = TimingsManager.getTiming("Actaeon move tick");
     }

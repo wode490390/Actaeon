@@ -1,6 +1,5 @@
 package me.onebone.actaeon.entity;
 
-import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockLiquid;
@@ -34,6 +33,7 @@ abstract public class MovingEntity extends EntityCreature {
     private boolean isKnockback = false;
 
     private Map<Class<? extends RouteFinder>, RouteFinder> routeFinders = new HashMap<>();
+
     @Getter
     private RouteFinder route;
 
@@ -155,9 +155,7 @@ abstract public class MovingEntity extends EntityCreature {
                 //Server.getInstance().getScheduler().scheduleAsyncTask(new RouteFinderSearchAsyncTask(this.route, this.level, this, this.getTarget(), this.boundingBox));
                 this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
 
-                ActaeonTimings.PATH_SEARCH.startTiming();
                 this.route.search();
-                ActaeonTimings.PATH_SEARCH.stopTiming();
 
 			/*if(this.route.isSearching()) this.route.research();
             else this.route.search();*/
@@ -319,9 +317,7 @@ abstract public class MovingEntity extends EntityCreature {
 
             this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
 
-            ActaeonTimings.PATH_SEARCH.startTiming();
             this.route.search();
-            ActaeonTimings.PATH_SEARCH.stopTiming();
 			/*if(this.route.isSearching()) this.route.research();
 			else this.route.search();*/
         }
@@ -447,10 +443,6 @@ abstract public class MovingEntity extends EntityCreature {
         this.route = route;
     }
 
-    public RouteFinder getRoute() {
-        return route;
-    }
-
     public TargetFinder getTargetFinder() {
         return targetFinder;
     }
@@ -532,7 +524,7 @@ abstract public class MovingEntity extends EntityCreature {
     }
 
     @Override
-    protected void updateMovement() {
+    public void updateMovement() {
         double diffPosition = (this.x - this.lastX) * (this.x - this.lastX) + (this.y - this.lastY) * (this.y - this.lastY) + (this.z - this.lastZ) * (this.z - this.lastZ);
         double diffRotation = (this.headYaw - lastHeadYaw) * (this.headYaw - lastHeadYaw) + (this.yaw - this.lastYaw) * (this.yaw - this.lastYaw) + (this.pitch - this.lastPitch) * (this.pitch - this.lastPitch);
 
@@ -547,11 +539,6 @@ abstract public class MovingEntity extends EntityCreature {
             this.lastPitch = this.pitch;
 
             this.addMovement(this.x, this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.headYaw);
-
-            if (this.linkedEntity instanceof Player) {
-                ((Player) this.linkedEntity).newPosition = this.add(this.getMountedOffset().asVector3());
-                ((Player) this.linkedEntity).processMovement(1);
-            }
         }
 
         if (diffMotion > 0.0025 || (diffMotion > 0.0001 && this.getMotion().lengthSquared() <= 0.0001)) { //0.05 ** 2
