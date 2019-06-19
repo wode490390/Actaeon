@@ -3,6 +3,7 @@ package me.onebone.actaeon.entity.spawner;
 import cn.nukkit.IPlayer;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
@@ -66,7 +67,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
             SpawnResult lastSpawnResult;
 
             for (Player player : onlinePlayers) {
-                if (player.getLevel().getDimension().ordinal() == Level.DIMENSION_OVERWORLD && isWorldSpawnAllowed(player.getLevel())) {
+                if (player.getLevel().getDimension() == Level.DIMENSION_OVERWORLD && isWorldSpawnAllowed(player.getLevel())) {
                     lastSpawnResult = spawn(player);
                     if (lastSpawnResult.equals(SpawnResult.MAX_SPAWN_REACHED)) {
                         break;
@@ -96,15 +97,15 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     protected SpawnResult spawn(IPlayer iPlayer) {
         // boolean offlinePlayer = iPlayer instanceof OfflinePlayer;
         //
-        // Level level = offlinePlayer ? ((OfflinePlayer) iPlayer).getLevel() : ((Player) iPlayer).getLevel();
+        // Level level = offlinePlayer ? ((OfflinePlayer) iPlayer).getLevel() : ((Position) iPlayer).getLevel();
         //
         // if (!isEntitySpawnAllowed(level)) {
         // return SpawnResult.MAX_SPAWN_REACHED;
         // }
         //
-        // Position pos = offlinePlayer ? ((OfflinePlayer) iPlayer).getLastKnownPosition() : ((Player) iPlayer).getPosition();
-        Position pos = ((Player) iPlayer).getPosition();
-        Level level = ((Player) iPlayer).getLevel();
+        // Position pos = offlinePlayer ? ((OfflinePlayer) iPlayer).getLastKnownPosition() : ((Entity) iPlayer).getPosition();
+        Position pos = ((Entity) iPlayer).getPosition();
+        Level level = ((Position) iPlayer).getLevel();
 
         if (this.spawnTask.entitySpawnAllowed(level, getEntityNetworkId(), iPlayer.getPlayer())) {
             if (pos != null) {

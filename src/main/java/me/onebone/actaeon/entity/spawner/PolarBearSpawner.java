@@ -53,5 +53,4 @@ public class PolarBearSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "PolarBear";
     }
-
 }

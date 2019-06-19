@@ -11,7 +11,6 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.UpdateAttributesPacket;
-import lombok.Getter;
 import me.onebone.actaeon.hook.HookManager;
 import me.onebone.actaeon.hook.MovingEntityHook;
 import me.onebone.actaeon.route.AdvancedRouteFinder;
@@ -27,14 +26,14 @@ import me.onebone.actaeon.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 abstract public class MovingEntity extends EntityCreature {
 
     private boolean isKnockback = false;
 
-    private Map<Class<? extends RouteFinder>, RouteFinder> routeFinders = new HashMap<>();
+    private final Map<Class<? extends RouteFinder>, RouteFinder> routeFinders = new HashMap<>();
 
-    @Getter
     private RouteFinder route;
 
     private TargetFinder targetFinder = null;
@@ -45,7 +44,7 @@ abstract public class MovingEntity extends EntityCreature {
 
     public boolean routeLeading = true;
 
-    private HookManager hookManager = new HookManager();
+    private final HookManager hookManager = new HookManager();
 
     private MovingEntityTask task = null;
 
@@ -55,8 +54,7 @@ abstract public class MovingEntity extends EntityCreature {
     public double headYaw;
     public double lastHeadYaw;
 
-    @Getter
-    private EntityLookManager lookManager = new EntityLookManager(this);
+    private final EntityLookManager lookManager = new EntityLookManager(this);
 
     public MovingEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -146,7 +144,7 @@ abstract public class MovingEntity extends EntityCreature {
                     double minY = block.getFloorY();
                     double maxY = minY + 1 - f;
 
-                    swim = Math.max(swim, this.boundingBox.maxY >= maxY ? maxY - this.boundingBox.minY : this.boundingBox.maxY - minY);
+                    swim = Math.max(swim, this.boundingBox.getMaxY() >= maxY ? maxY - this.boundingBox.getMinY() : this.boundingBox.getMaxY() - minY);
                     break;
                 }
             }
@@ -157,7 +155,7 @@ abstract public class MovingEntity extends EntityCreature {
 
                 this.route.search();
 
-			/*if(this.route.isSearching()) this.route.research();
+            /*if(this.route.isSearching()) this.route.research();
             else this.route.search();*/
 
                 hasUpdate = true;
@@ -219,7 +217,7 @@ abstract public class MovingEntity extends EntityCreature {
                 }
 
                 if (swim != 0) {
-                    if (this.level.rand.nextFloat() < 0.8) {
+                    if (ThreadLocalRandom.current().nextFloat() < 0.8) {
                         this.motionY = Math.min(0.15, this.motionY + (0.2 * swim));
                     }
 
@@ -250,7 +248,7 @@ abstract public class MovingEntity extends EntityCreature {
                         if (blockBB == null || b.canPassThrough())
                             continue;
 
-                        double diffY = blockBB.maxY - this.boundingBox.minY;
+                        double diffY = blockBB.getMaxY() - this.boundingBox.getMinY();
                         if (diffY < getJumpHeight()) {
                             jump = true;
                         }
@@ -318,8 +316,8 @@ abstract public class MovingEntity extends EntityCreature {
             this.route.setPositions(this.level, this.clone(), getTarget().clone(), this.boundingBox.clone());
 
             this.route.search();
-			/*if(this.route.isSearching()) this.route.research();
-			else this.route.search();*/
+            /*if(this.route.isSearching()) this.route.research();
+            else this.route.search();*/
         }
     }
 
@@ -550,9 +548,11 @@ abstract public class MovingEntity extends EntityCreature {
         }
     }
 
-    @Override
-    public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
-        this.level.addEntityMovement(this.chunk.getX(), this.chunk.getZ(), this.id, x, y, z, yaw, pitch, headYaw, false);
+    public RouteFinder getRoute() {
+        return route;
+    }
+
+    public EntityLookManager getLookManager() {
+        return lookManager;
     }
 }
-

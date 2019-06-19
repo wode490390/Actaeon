@@ -2,7 +2,7 @@ package me.onebone.actaeon.hook;
 
 import me.onebone.actaeon.entity.MovingEntity;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author CreeperFace
@@ -29,7 +29,7 @@ public class LookIdleHook extends MovingEntityHook {
 
     @Override
     public boolean shouldExecute() {
-        return this.entity.level.rand.nextFloat() < 0.02;
+        return ThreadLocalRandom.current().nextFloat() < 0.02;
     }
 
     @Override
@@ -39,11 +39,9 @@ public class LookIdleHook extends MovingEntityHook {
 
     @Override
     public void startExecuting() {
-        Random random = this.entity.level.rand;
-
-        double rng = (Math.PI * 2) * random.nextDouble();
+        double rng = (Math.PI * 2) * ThreadLocalRandom.current().nextDouble();
         this.x = Math.cos(rng);
         this.z = Math.sin(rng);
-        this.time = 20 + random.nextInt(20);
+        this.time = 20 + ThreadLocalRandom.current().nextInt(20);
     }
 }

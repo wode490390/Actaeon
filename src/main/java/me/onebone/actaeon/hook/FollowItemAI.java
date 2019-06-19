@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
  */
 public class FollowItemAI extends MovingEntityHook {
 
-    private Collection<Integer> items;
-    private Player holder = null;
-    private double range;
+    private final Collection<Integer> items;
+    private Player holder;
+    private final double range;
 
     private double delay;
 

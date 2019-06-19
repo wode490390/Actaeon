@@ -3,6 +3,7 @@ package me.onebone.actaeon.route;
 import me.onebone.actaeon.entity.MovingEntity;
 
 public class SimpleRouteFinder extends RouteFinder {
+
     public SimpleRouteFinder(MovingEntity entity) {
         super(entity);
     }

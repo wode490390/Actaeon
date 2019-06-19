@@ -6,8 +6,8 @@ import me.onebone.actaeon.entity.MovingEntity;
 
 public class AreaPlayerHoldTargetFinder extends TargetFinder {
 
-    private Item item;
-    private int radius;
+    private final Item item;
+    private final int radius;
 
     public AreaPlayerHoldTargetFinder(MovingEntity entity, long interval, Item item, int radius) {
         super(entity, interval);
@@ -15,6 +15,7 @@ public class AreaPlayerHoldTargetFinder extends TargetFinder {
         this.radius = radius;
     }
 
+    @Override
     protected void find() {
         Player near = null;
         double nearest = this.radius * this.radius;

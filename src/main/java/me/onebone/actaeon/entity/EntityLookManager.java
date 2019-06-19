@@ -3,28 +3,24 @@ package me.onebone.actaeon.entity;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.math.Vector3;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * @author CreeperFace
  */
-@RequiredArgsConstructor
 public class EntityLookManager {
 
-    @Getter
     private final MovingEntity entity;
 
-    @Getter
     private double stepYaw;
-    @Getter
     private double stepPitch;
 
-    @Getter
     private Vector3 target;
 
-    @Getter
     private boolean looking;
+    
+    public EntityLookManager(MovingEntity entity) {
+        this.entity = entity;
+    }
 
     public void setLookPosition(Entity entity, double stepYaw, double stepPitch) {
         Vector3 pos = entity.clone();
@@ -32,7 +28,7 @@ public class EntityLookManager {
         if (entity instanceof EntityLiving) {
             pos.y += entity.getEyeHeight();
         } else {
-            pos.y = (entity.getBoundingBox().minY + entity.getBoundingBox().maxY) / 2;
+            pos.y = (entity.getBoundingBox().getMinY() + entity.getBoundingBox().getMaxY()) / 2;
         }
 
         setLookPosition(pos, stepYaw, stepPitch);
@@ -82,5 +78,25 @@ public class EntityLookManager {
         }
 
         return value;
+    }
+
+    public MovingEntity getEntity() {
+        return entity;
+    }
+
+    public double getStepYaw() {
+        return stepYaw;
+    }
+
+    public double getStepPitch() {
+        return stepPitch;
+    }
+
+    public Vector3 getTarget() {
+        return target;
+    }
+
+    public boolean isLooking() {
+        return looking;
     }
 }

@@ -2,6 +2,7 @@ package me.onebone.actaeon.route;
 
 import cn.nukkit.level.Level;
 import cn.nukkit.math.AxisAlignedBB;
+import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import me.onebone.actaeon.entity.MovingEntity;
 
@@ -9,21 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RouteFinder {
+
     private int current = 0;
-    protected Vector3 destination = null, start = null;
+    protected Vector3 destination;
+    protected Vector3 start;
     private boolean arrived = false;
     protected List<Node> nodes = new ArrayList<>();
-    protected Level level = null;
-    protected AxisAlignedBB aabb = null;
+    protected Level level;
+    protected AxisAlignedBB aabb;
 
-    protected MovingEntity entity = null;
+    protected MovingEntity entity;
 
     protected boolean forceStop = false;
     public long stopRouteFindUntil = System.currentTimeMillis();
     public volatile Thread thread;
 
     public RouteFinder(MovingEntity entity) {
-        if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
+        if (entity == null) {
+            throw new IllegalArgumentException("Entity cannot be null");
+        }
 
         this.entity = entity;
     }
@@ -40,13 +45,17 @@ public abstract class RouteFinder {
     }
 
     public void setStart(Vector3 start) {
-        if (start == null) throw new IllegalArgumentException("Cannot set start as null");
+        if (start == null) {
+            throw new IllegalArgumentException("Cannot set start as null");
+        }
 
         this.start = new Vector3(start.x, start.y, start.z);
     }
 
     public Vector3 getStart() {
-        if (start == null) return null;
+        if (start == null) {
+            return null;
+        }
 
         return new Vector3(start.x, start.y, start.z);
     }
@@ -61,13 +70,17 @@ public abstract class RouteFinder {
     }
 
     public Vector3 getDestination() {
-        if (destination == null) return null;
+        if (destination == null) {
+            return null;
+        }
 
         return new Vector3(destination.x, destination.y, destination.z);
     }
 
     public void setLevel(Level level) {
-        if (level == null) throw new IllegalArgumentException("Level cannot be null");
+        if (level == null) {
+            throw new IllegalArgumentException("Level cannot be null");
+        }
 
         this.level = level;
     }
@@ -78,14 +91,16 @@ public abstract class RouteFinder {
 
     public void setBoundingBox(AxisAlignedBB bb) {
         if (bb == null) {
-            this.aabb = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+            this.aabb = new SimpleAxisAlignedBB(0, 0, 0, 0, 0, 0);
         }
 
         this.aabb = bb;
     }
 
     public AxisAlignedBB getBoundingBox() {
-        if (this.aabb == null) return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+        if (this.aabb == null) {
+            return new SimpleAxisAlignedBB(0, 0, 0, 0, 0, 0);
+        }
 
         return this.aabb.clone();
     }
@@ -118,7 +133,9 @@ public abstract class RouteFinder {
      * @return true if it has next node to go
      */
     public boolean hasNext() {
-        if (nodes.size() == 0) throw new IllegalStateException("There is no path found");
+        if (nodes.isEmpty()) {
+            throw new IllegalStateException("There is no path found");
+        }
 
         return !this.arrived && nodes.size() > this.current + 1;
     }
@@ -129,7 +146,9 @@ public abstract class RouteFinder {
      * @return true if succeed
      */
     public boolean next() {
-        if (nodes.size() == 0) throw new IllegalStateException("There is no path found");
+        if (nodes.isEmpty()) {
+            throw new IllegalStateException("There is no path found");
+        }
 
         if (this.hasNext()) {
             this.current++;
@@ -146,9 +165,9 @@ public abstract class RouteFinder {
     public boolean hasReachedNode(Vector3 vec) {
         Vector3 cur = this.get().getVector3();
 
-		/*return NukkitMath.floorDouble(vec.x) ==  NukkitMath.floorDouble(cur.x)
+        /*return NukkitMath.floorDouble(vec.x) ==  NukkitMath.floorDouble(cur.x)
                 && NukkitMath.floorDouble(vec.y) == NukkitMath.floorDouble(cur.y)
-				&& NukkitMath.floorDouble(vec.z) == NukkitMath.floorDouble(cur.z);*/
+                && NukkitMath.floorDouble(vec.z) == NukkitMath.floorDouble(cur.z);*/
         return vec.x == cur.x
                 //&& vec.y == cur.y
                 && vec.z == cur.z;
@@ -160,9 +179,12 @@ public abstract class RouteFinder {
      * @return current node
      */
     public Node get() {
-        if (nodes.size() == 0) throw new IllegalStateException("There is no path found.");
-
-        if (this.arrived) return null;
+        if (nodes.isEmpty()) {
+            throw new IllegalStateException("There is no path found.");
+        }
+        if (this.arrived) {
+            return null;
+        }
         return nodes.get(current);
     }
 

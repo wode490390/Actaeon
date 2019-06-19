@@ -10,13 +10,14 @@ import me.onebone.actaeon.util.ActaeonTimings;
 import java.util.*;
 
 public class AdvancedRouteFinder extends RouteFinder {
+
     private boolean succeed = false, searching = false;
 
-    private Vector3 realDestination = null;
+    private Vector3 realDestination;
 
-    private Set<Node> open = new HashSet<>();
+    private final Set<Node> open = new HashSet<>();
 
-    private Grid grid = new Grid();
+    private final Grid grid = new Grid();
 
     public AdvancedRouteFinder(MovingEntity entity) {
         super(entity);
@@ -121,12 +122,17 @@ public class AdvancedRouteFinder extends RouteFinder {
                 open.remove(node);
 
                 for (Node neighbor : this.getNeighbors(node)) {
-                    if (neighbor.closed) continue;
+                    if (neighbor.closed) {
+                        continue;
+                    }
 
                     double tentative_gScore = node.g + neighbor.getVector3().distance(node.getVector3());
 
-                    if (!open.contains(neighbor)) open.add(neighbor);
-                    else if (neighbor.g != -1 && tentative_gScore >= neighbor.g) continue;
+                    if (!open.contains(neighbor)) {
+                        open.add(neighbor);
+                    } else if (neighbor.g != -1 && tentative_gScore >= neighbor.g) {
+                        continue;
+                    }
 
                     neighbor.setParent(node);
                     neighbor.g = tentative_gScore;
@@ -141,8 +147,9 @@ public class AdvancedRouteFinder extends RouteFinder {
             }
 
             Vector3 highestUnder = this.getHighestUnder(this.destination.getX(), this.destination.getY(), this.destination.getZ());
-            if (highestUnder != null)
+            if (highestUnder != null) {
                 this.addNode(new Node(new Vector3(this.destination.getX(), highestUnder.getY() + 1, this.destination.getZ())));
+            }
             return this.succeed = this.searching = false;
         } finally {
             ActaeonTimings.PATH_FIND.stopTiming();
@@ -200,7 +207,9 @@ public class AdvancedRouteFinder extends RouteFinder {
 
         for (int y = (int) Math.min(dy, 255); y >= minY; y--) {
             int blockId = level.getBlockIdAt((int) x, y, (int) z);
-            if (canWalkOn(blockId) || !Block.get(blockId).canPassThrough()) return new Vector3(x, y, z);
+            if (canWalkOn(blockId) || !Block.get(blockId).canPassThrough()) {
+                return new Vector3(x, y, z);
+            }
         }
 
         return null;
@@ -208,7 +217,9 @@ public class AdvancedRouteFinder extends RouteFinder {
 
     double isWalkableAt(Vector3 vec) {
         Vector3 block = this.getHighestUnder(vec.x, vec.y + 2, vec.z);
-        if (block == null) return -256;
+        if (block == null) {
+            return -256;
+        }
 
         double diff = (block.y - vec.y) + 1;
 
@@ -269,7 +280,8 @@ public class AdvancedRouteFinder extends RouteFinder {
     }
 
     private class Grid {
-        private Map<Double, Map<Double, Map<Double, Node>>> grid = new HashMap<>();
+
+        private final Map<Double, Map<Double, Map<Double, Node>>> grid = new HashMap<>();
 
         synchronized void clear() {
             grid.clear();

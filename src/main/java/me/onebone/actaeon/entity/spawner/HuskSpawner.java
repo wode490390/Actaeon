@@ -53,5 +53,4 @@ public class HuskSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Husk";
     }
-
 }

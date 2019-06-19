@@ -54,5 +54,4 @@ public class MooshroomSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Mooshroom";
     }
-
 }

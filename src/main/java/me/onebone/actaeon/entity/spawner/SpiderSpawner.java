@@ -22,6 +22,7 @@ public class SpiderSpawner extends AbstractEntitySpawner {
         super(spawnTask);
     }
 
+    @Override
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
 
@@ -65,5 +66,4 @@ public class SpiderSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

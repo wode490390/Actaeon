@@ -19,5 +19,4 @@ public interface IEntitySpawner {
     int getEntityNetworkId();
 
     String getEntityName();
-
 }

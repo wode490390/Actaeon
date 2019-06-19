@@ -53,5 +53,4 @@ public class StraySpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Stray";
     }
-
 }

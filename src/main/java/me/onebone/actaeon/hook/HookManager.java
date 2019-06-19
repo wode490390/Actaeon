@@ -12,7 +12,7 @@ public class HookManager {
     private final Set<Entry> hooks = new LinkedHashSet<>();
     private final Set<Entry> activeHooks = new LinkedHashSet<>();
 
-    private int tickRate = 3;
+    private final int tickRate = 3;
 
     public void addHook(int priority, MovingEntityHook hook) {
         hooks.add(new Entry(priority, hook));
@@ -63,8 +63,9 @@ public class HookManager {
     }
 
     private boolean canActivate(Entry entry) {
-        if (this.activeHooks.isEmpty())
+        if (this.activeHooks.isEmpty()) {
             return true;
+        }
 
         for (Entry running : activeHooks) {
             if (running != entry) {
@@ -86,6 +87,7 @@ public class HookManager {
     }
 
     private class Entry {
+
         public final MovingEntityHook hook;
         public final int priority;
         public boolean active;
@@ -95,10 +97,12 @@ public class HookManager {
             this.hook = hook;
         }
 
+        @Override
         public boolean equals(Object obj) {
             return this == obj || (obj instanceof Entry && this.hook.equals(((Entry) obj).hook));
         }
 
+        @Override
         public int hashCode() {
             return this.hook.hashCode();
         }

@@ -22,11 +22,12 @@ public class RabbitSpawner extends AbstractEntitySpawner {
         super(spawnTask);
     }
 
+    @Override
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
 
-        int blockId = level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z);
-        int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
+        //int blockId = level.getBlockIdAt((int) pos.x, (int) pos.y, (int) pos.z);
+        //int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
 
         // normally, they spawn in deserts, flower forests, taiga, mega taiga, cold taiga, ice plains, ice mountains, ice spikes, and the "hills" and "M" variants
         // but as this are nearly all biomes, we leave that as is
@@ -64,5 +65,4 @@ public class RabbitSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

@@ -15,10 +15,10 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public class AttackTask extends MovingEntityTask {
 
-    private Entity target;
-    private float damage;
-    private double viewAngle;
-    private boolean effectual;
+    private final Entity target;
+    private final float damage;
+    private final double viewAngle;
+    private final boolean effectual;
 
     public AttackTask(MovingEntity entity, Entity target, float damage, double viewAngle, boolean effectual) {
         super(entity);

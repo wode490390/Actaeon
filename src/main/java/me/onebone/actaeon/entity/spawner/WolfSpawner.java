@@ -22,10 +22,11 @@ public class WolfSpawner extends AbstractEntitySpawner {
         super(spawnTask);
     }
 
+    @Override
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
 
-        int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
+        //int blockLightLevel = level.getBlockLightAt((int) pos.x, (int) pos.y, (int) pos.z);
         int biomeId = level.getBiomeId((int) pos.x, (int) pos.z);
 
         if (biomeId != 4 && biomeId != 27 && biomeId == 5) { //FOREST, BIRCH_FOREST, TAIGA
@@ -64,5 +65,4 @@ public class WolfSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

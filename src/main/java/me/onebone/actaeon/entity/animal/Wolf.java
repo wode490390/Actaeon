@@ -12,10 +12,14 @@ import cn.nukkit.utils.DyeColor;
 import me.onebone.actaeon.entity.EntityTameable;
 import me.onebone.actaeon.hook.*;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Wolf extends EntityTameable {
 
     public static final int NETWORK_ID = 14;
-//    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.BONE));
+
+//    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(
+//            Item.get(Item.BONE));
 
     protected DyeColor collarColor;
 
@@ -90,7 +94,7 @@ public class Wolf extends EntityTameable {
             if (item.getId() == Item.BONE && !isAngry()) {
                 item.count--;
 
-                if (this.level.rand.nextInt(3) == 0) {
+                if (ThreadLocalRandom.current().nextInt(3) == 0) {
                     setTamed(true, player);
                     setMaxHealth(20);
                     setHealth(20);
@@ -129,7 +133,7 @@ public class Wolf extends EntityTameable {
     @Override
     public boolean attack(EntityDamageEvent source) { //TODO: angry
         if (source instanceof EntityDamageByEntityEvent) {
-            Entity attacker = ((EntityDamageByEntityEvent) source).getDamager();
+            //Entity attacker = ((EntityDamageByEntityEvent) source).getDamager();
             /*if (!this.getOwnerName().equalsIgnoreCase(attacker.getName()) || !this.hasOwner()) {
                 this.setHate(attacker);
                 this.addHook("attack", new AttackHook(this, 1, 4, 1000, 10, 180));

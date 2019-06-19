@@ -3,8 +3,8 @@ package me.onebone.actaeon.entity.animal;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.ByteEntityData;
-import cn.nukkit.inventory.Recipe;
-import cn.nukkit.inventory.ShapelessRecipe;
+//import cn.nukkit.inventory.Recipe;
+//import cn.nukkit.inventory.ShapelessRecipe;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
@@ -17,13 +17,15 @@ import me.onebone.actaeon.hook.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Sheep extends Animal {
 
     public static final int NETWORK_ID = 13;
-    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT));
+
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(
+            Item.get(Item.WHEAT));
 
     public Sheep(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -81,7 +83,9 @@ public class Sheep extends Animal {
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.WOOL, getColor().getWoolData(), 1)};
+        return new Item[]{
+                Item.get(Item.WOOL, getColor().getWoolData(), 1)
+        };
     }
 
     @Override
@@ -117,10 +121,8 @@ public class Sheep extends Animal {
     }
 
     public static DyeColor getRandomSheepColor() {
-        Random random = new Random();
-
-        int i = random.nextInt(100);
-        return i < 5 ? DyeColor.BLACK : (i < 10 ? DyeColor.GRAY : (i < 15 ? DyeColor.LIGHT_GRAY : (i < 18 ? DyeColor.BROWN : (random.nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE))));
+        int i = ThreadLocalRandom.current().nextInt(100);
+        return i < 5 ? DyeColor.BLACK : (i < 10 ? DyeColor.GRAY : (i < 15 ? DyeColor.LIGHT_GRAY : (i < 18 ? DyeColor.BROWN : (ThreadLocalRandom.current().nextInt(500) == 0 ? DyeColor.PINK : DyeColor.WHITE))));
     }
 
     @Override
@@ -135,12 +137,12 @@ public class Sheep extends Animal {
 
             this.setSheared(true);
 
-            int count = 1 + this.level.rand.nextInt(3);
+            int count = 1 + ThreadLocalRandom.current().nextInt(3);
             while (count-- > 0) {
                 this.level.dropItem(this.add(0, 1), Item.get(Item.WOOL, getColor().getWoolData()), new Vector3(
-                        (this.level.rand.nextFloat() - this.level.rand.nextFloat()) * 0.1,
-                        this.level.rand.nextFloat() * 0.05,
-                        (this.level.rand.nextFloat() - this.level.rand.nextFloat()) * 0.1
+                        (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.1,
+                        ThreadLocalRandom.current().nextFloat() * 0.05,
+                        (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.1
                 ));
             }
 
@@ -157,6 +159,7 @@ public class Sheep extends Animal {
         return super.onInteract(player, item);
     }
 
+    @Override
     public void eatGrass() {
         this.setSheared(false);
 
@@ -175,28 +178,26 @@ public class Sheep extends Animal {
 
         ((Sheep) baby).setColor(getColorFromParents(this, (Sheep) mother));
 
-        return (Sheep) baby;
+        return (EntityAgeable) baby;
     }
 
     private DyeColor getColorFromParents(Sheep father, Sheep mother) {
         List<DyeColor> colors = Arrays.asList(father.getColor(), mother.getColor());
 
-        for (Recipe recipe : getServer().getCraftingManager().recipes.values()) {
-            if (!(recipe instanceof ShapelessRecipe)) {
-                continue;
-            }
+        //for (Recipe recipe : getServer().getCraftingManager().recipes) {
+            //if (!(recipe instanceof ShapelessRecipe)) {
+            //    continue;
+            //}
 
-            ShapelessRecipe rec = (ShapelessRecipe) recipe;
-            List<Item> ingredients = rec.getIngredientList();
+            //ShapelessRecipe rec = (ShapelessRecipe) recipe;
+            //List<Item> ingredients = rec.getIngredientList();
 
-            if (ingredients.size() != 2) {
-                continue;
-            }
+            //if (ingredients.size() != 2) {
+            //    continue;
+            //}
+        //}
 
-
-        }
-
-        if (this.level.rand.nextBoolean()) {
+        if (ThreadLocalRandom.current().nextBoolean()) {
             return father.getColor();
         } else {
             return mother.getColor();

@@ -51,5 +51,4 @@ public class HorseSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Horse";
     }
-
 }

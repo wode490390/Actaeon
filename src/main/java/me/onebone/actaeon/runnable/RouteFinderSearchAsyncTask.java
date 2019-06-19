@@ -17,12 +17,12 @@ import me.onebone.actaeon.route.RouteFinder;
  */
 public class RouteFinderSearchAsyncTask extends AsyncTask {
 
-    private RouteFinder route;
+    private final RouteFinder route;
     private int retryTimes = 0;
-    private Level level = null;
-    private Vector3 start = null;
-    private Vector3 dest = null;
-    private AxisAlignedBB bb = null;
+    private Level level;
+    private Vector3 start;
+    private Vector3 dest;
+    private AxisAlignedBB bb;
     public Thread thread;
 
     /*public RouteFinderSearchAsyncTask(RouteFinder route) {
@@ -47,7 +47,9 @@ public class RouteFinderSearchAsyncTask extends AsyncTask {
 
         while (this.retryTimes < 100) {
             if (!this.route.isSearching()) {
-                if (this.level != null) this.route.setPositions(this.level, this.start, this.dest, this.bb);
+                if (this.level != null) {
+                    this.route.setPositions(this.level, this.start, this.dest, this.bb);
+                }
                 this.route.search();
                 //Server.getInstance().getLogger().notice("异步寻路线程-" + this.getTaskId() + " 开始寻路");
                 return;
@@ -62,6 +64,5 @@ public class RouteFinderSearchAsyncTask extends AsyncTask {
         }
         Server.getInstance().getLogger().warning("异步寻路线程-" + this.getTaskId() + " 超过等待限制");
         this.route.forceStop();
-
     }
 }

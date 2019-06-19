@@ -1,4 +1,15 @@
-.idea/
+.idea
+.idea/*
 *.iml
 /src/main/resources/rebel.xml
 out/
+*.class
+target
+target/*
+build
+build/*
+*.MF
+.classpath
+.project
+.settings
+.settings/*

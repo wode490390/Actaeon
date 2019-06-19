@@ -2,7 +2,7 @@ package me.onebone.actaeon.target;
 
 import me.onebone.actaeon.entity.MovingEntity;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * StrollingTargetFinder
@@ -14,10 +14,10 @@ import java.util.Random;
  */
 public class StrollingTargetFinder extends TargetFinder {
 
-    public int needFind = new Random().nextInt(3);
+    public int needFind = ThreadLocalRandom.current().nextInt(3);
     public int needFindResetMax = 8;
     public int needFindResetUntil = 0;
-    private double radius;
+    //private double radius;
     public int findHighest = -1;  //<0为关闭寻找最高，0为至虚空，>0为向下方块格数限制
 
     public StrollingTargetFinder(MovingEntity entity) {
@@ -25,21 +25,20 @@ public class StrollingTargetFinder extends TargetFinder {
     }
 
     public StrollingTargetFinder(MovingEntity entity, double radius) {
-        this(entity, radius, 1000 * (new Random().nextInt(2) + 2));
+        this(entity, radius, 1000 * (ThreadLocalRandom.current().nextInt(2) + 2));
     }
 
     public StrollingTargetFinder(MovingEntity entity, double radius, long inter) {
         super(entity, inter);
-        this.radius = radius;
+        //this.radius = radius;
     }
 
     @Override
     protected void find() {
-//        Random random = new Random();
 //        if (this.needFind > 0) {
 //            Vector3 base = this.entity.getRealTarget() != null ? this.entity.getTarget() : this.getEntity().getPosition();
 //            //for (int i = 0; i < 5; i++) {
-//            double r = random.nextDouble() * 360;
+//            double r = ThreadLocalRandom.current().nextDouble() * 360;
 //            double x = this.radius * Math.cos(Math.toRadians(r));
 //            double z = this.radius * Math.sin(Math.toRadians(r));
 //            double y = base.getY();
@@ -53,7 +52,7 @@ public class StrollingTargetFinder extends TargetFinder {
 //            //break;
 //            //}
 //            this.needFind--;
-//            if (random.nextInt(10) < 2) {
+//            if (ThreadLocalRandom.current().nextInt(10) < 2) {
 //                this.entity.setSprinting(true);
 //            } else {
 //                this.entity.setSprinting(false);
@@ -64,5 +63,4 @@ public class StrollingTargetFinder extends TargetFinder {
 //        }
 //        if (this.needFind <= this.needFindResetUntil) this.needFind = this.needFindResetMax;
     }
-
 }

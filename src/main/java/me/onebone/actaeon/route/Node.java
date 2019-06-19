@@ -3,7 +3,8 @@ package me.onebone.actaeon.route;
 import cn.nukkit.math.Vector3;
 
 public class Node {
-    private Node parent = null;
+
+    private Node parent;
     public boolean closed = false;
 
     private Vector3 node;
@@ -46,6 +47,7 @@ public class Node {
         this.node = this.node.add(x, y, z);
     }
 
+    @Override
     public String toString() {
         return "Node (x=" + this.node.x + ", y=" + this.node.y + ", " + this.node.z + ")";
     }

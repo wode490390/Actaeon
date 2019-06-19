@@ -13,7 +13,11 @@ import java.util.Set;
 public class Pig extends Animal implements EntityAgeable {
 
     public static final int NETWORK_ID = 12;
-    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.BEETROOT), Item.get(Item.CARROT), Item.get(Item.POTATO));
+
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(
+            Item.get(Item.BEETROOT),
+            Item.get(Item.CARROT),
+            Item.get(Item.POTATO));
 
     public Pig(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -60,7 +64,9 @@ public class Pig extends Animal implements EntityAgeable {
 
     @Override
     public Item[] getDrops() {
-        return new Item[]{Item.get(Item.RAW_PORKCHOP)};
+        return new Item[]{
+                Item.get(Item.RAW_PORKCHOP)
+        };
     }
 
     @Override

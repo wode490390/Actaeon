@@ -3,7 +3,6 @@ package me.onebone.actaeon.hook;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.math.AxisAlignedBB;
 import me.onebone.actaeon.entity.EntityAgeable;
-import me.onebone.actaeon.entity.animal.Animal;
 import me.onebone.actaeon.target.EntityTarget;
 
 /**
@@ -44,8 +43,9 @@ public class FollowParentHook extends MovingEntityHook {
 
     @Override
     public void onUpdate(int tick) {
-        if (tick % 10 != 0)
+        if (tick % 10 != 0) {
             return;
+        }
 
         this.ageable.setTarget(EntityTarget.builder().target(parent).identifier(parent.getName()).build(), true);
     }
@@ -58,7 +58,7 @@ public class FollowParentHook extends MovingEntityHook {
         for (Entity entity : ageable.getLevel().getNearbyEntities(bb, ageable)) {
             double l;
             if (entity.getClass().isInstance(ageable) && entity.isAlive() && ((EntityAgeable) entity).getGrowingAge() > 0 && (l = ageable.distanceSquared(entity)) < dist) {
-                target = (Animal) entity;
+                target = (EntityAgeable) entity;
                 dist = l;
             }
         }

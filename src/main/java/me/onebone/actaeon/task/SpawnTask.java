@@ -27,9 +27,9 @@ public class SpawnTask implements Runnable {
 
     private List<IEntitySpawner> entitySpawners = new ArrayList<>();
 
-    private Config pluginConfig = null;
+    private Config pluginConfig;
 
-    private Actaeon plugin = null;
+    private Actaeon plugin;
 
     private int spawnRadius;
 
@@ -224,5 +224,4 @@ public class SpawnTask implements Runnable {
         }
         return y;
     }
-
 }

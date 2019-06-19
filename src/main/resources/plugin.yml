@@ -1,5 +1,5 @@
 name: Actaeon
-version: "VERSION"
+version: "${pom.version}"
 author: onebone
 api: [1.0.0]
 main: me.onebone.actaeon.Actaeon

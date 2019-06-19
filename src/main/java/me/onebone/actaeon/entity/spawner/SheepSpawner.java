@@ -21,6 +21,7 @@ public class SheepSpawner extends AbstractEntitySpawner {
         super(spawnTask, 1, 3);
     }
 
+    @Override
     public SpawnResult spawn(IPlayer iPlayer, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
 
@@ -63,5 +64,4 @@ public class SheepSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

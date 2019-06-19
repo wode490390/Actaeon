@@ -7,25 +7,26 @@ import cn.nukkit.math.Vector3;
 import java.util.Iterator;
 
 public class WalkableIterator implements Iterator<Block> {
+
     private final Level level;
     private final int maxDistance;
-    private final double width;
+    //private final double width;
 
     private boolean end = false;
 
     private Block currentBlockObject;
 
     private double currentDistance;
-    private Vector3 startPosition;
+    private final Vector3 startPosition;
     private Vector3 currentPosition = null;
     private Vector3 direction = null;
 
-    private AdvancedRouteFinder advancedRouteFinder;
+    private final AdvancedRouteFinder advancedRouteFinder;
 
     public WalkableIterator(AdvancedRouteFinder advancedRouteFinder, Level level, Vector3 start, Vector3 direction, double width, int maxDistance) {
         this.advancedRouteFinder = advancedRouteFinder;
         this.level = level;
-        this.width = width;
+        //this.width = width;
         this.maxDistance = maxDistance == 0 ? 120 : maxDistance;
         this.currentDistance = 0;
         this.currentPosition = start.clone();
@@ -53,7 +54,9 @@ public class WalkableIterator implements Iterator<Block> {
             this.end = true;
             return;
         }
-        if (this.end) return;
+        if (this.end) {
+            return;
+        }
 
         do {
             //if (this.currentDistance > 2 && new Random().nextInt(100) < 35) this.level.addParticle(new FlameParticle(this.currentPosition));
@@ -66,8 +69,9 @@ public class WalkableIterator implements Iterator<Block> {
             }
             this.currentPosition = next;
             this.currentDistance = this.currentPosition.distance(this.startPosition);
-            if (this.maxDistance > 0 && this.currentDistance > this.maxDistance) this.end = true;
+            if (this.maxDistance > 0 && this.currentDistance > this.maxDistance) {
+                this.end = true;
+            }
         } while (!this.end);
     }
-
 }

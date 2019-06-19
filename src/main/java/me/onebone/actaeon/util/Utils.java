@@ -1,11 +1,10 @@
 package me.onebone.actaeon.util;
 
 import cn.nukkit.entity.Entity;
-import cn.nukkit.math.BlockFace;
-import cn.nukkit.math.NukkitRandom;
+//import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Copyright © 2016 WetABQ&DreamCityAdminGroup All right reserved.
@@ -21,12 +20,11 @@ import java.util.Random;
  * ||||
  */
 public class Utils {
-    private static final Random random = new Random(System.currentTimeMillis());
 
-    private static final BlockFace FACE_X_PLUS = BlockFace.EAST;
-    private static final BlockFace FACE_X_MINUS = BlockFace.WEST;
-    private static final BlockFace FACE_Z_PLUS = BlockFace.SOUTH;
-    private static final BlockFace FACE_Z_MINUS = BlockFace.NORTH;
+    //private static final BlockFace FACE_X_PLUS = BlockFace.EAST;
+    //private static final BlockFace FACE_X_MINUS = BlockFace.WEST;
+    //private static final BlockFace FACE_Z_PLUS = BlockFace.SOUTH;
+    //private static final BlockFace FACE_Z_MINUS = BlockFace.NORTH;
 
     /**
      * Returns a random number between min (inkl.) and max (excl.) If you want a
@@ -40,7 +38,7 @@ public class Utils {
         if (min == max) {
             return max;
         }
-        return min + random.nextInt(max - min);
+        return min + ThreadLocalRandom.current().nextInt(max - min);
     }
 
     /**
@@ -50,13 +48,11 @@ public class Utils {
      * <code>false</code>
      */
     public static boolean rand() {
-        return random.nextBoolean();
+        return ThreadLocalRandom.current().nextBoolean();
     }
 
     public static Vector3 randomVector(Vector3 from, int xRadius, int yRadius, int zRadius) {
-        NukkitRandom random = new NukkitRandom();
-
-        return from.add(random.nextRange(-xRadius, xRadius), random.nextRange(-yRadius, yRadius), random.nextRange(-zRadius, zRadius));
+        return from.add(ThreadLocalRandom.current().nextInt(-xRadius, xRadius), ThreadLocalRandom.current().nextInt(-yRadius, yRadius), ThreadLocalRandom.current().nextInt(-zRadius, zRadius));
     }
 
     public static double getYawBetween(Vector3 from, Vector3 to) {

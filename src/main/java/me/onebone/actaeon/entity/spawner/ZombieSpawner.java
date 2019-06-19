@@ -65,5 +65,4 @@ public class ZombieSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

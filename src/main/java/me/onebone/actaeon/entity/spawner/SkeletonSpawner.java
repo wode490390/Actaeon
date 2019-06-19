@@ -63,5 +63,4 @@ public class SkeletonSpawner extends AbstractEntitySpawner {
     protected String getLogprefix() {
         return this.getClass().getSimpleName();
     }
-
 }

@@ -6,23 +6,25 @@ import me.onebone.actaeon.entity.MovingEntity;
 
 public class AreaHaterTargetFinder extends TargetFinder {
 
-    private int radius;
+    private final int radius;
     private boolean first = true;
-    private Class<? extends Entity> target;
+    //private final Class<? extends Entity> target;
 
     public AreaHaterTargetFinder(MovingEntity entity, Class<? extends Entity> target, long interval, int radius) {
         super(entity, interval);
         this.radius = radius;
-        this.target = target;
+        //this.target = target;
     }
 
+    @Override
     protected void find() {
         Player near = null;
         double nearest = this.radius * this.radius;
 
         for (Player player : this.getEntity().getLevel().getPlayers().values()) {
-            if (player.isCreative())
+            if (player.isCreative()) {
                 continue;
+            }
 
             if (this.getEntity().distanceSquared(player) < nearest) {
                 near = player;

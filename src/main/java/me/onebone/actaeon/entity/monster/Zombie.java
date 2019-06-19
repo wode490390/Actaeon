@@ -17,7 +17,6 @@ public class Zombie extends Monster implements EntityAgeable, Fallable {
         super(chunk, nbt);
         this.setTargetFinder(new AreaHaterTargetFinder(this, Player.class, 500, 16));
 
-
         this.addHook(4, new WanderHook(this));
 
         setMaxHealth(20);

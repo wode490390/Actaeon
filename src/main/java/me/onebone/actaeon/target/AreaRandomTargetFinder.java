@@ -8,7 +8,7 @@ import me.onebone.actaeon.entity.MovingEntity;
  */
 public class AreaRandomTargetFinder extends TargetFinder {
 
-    private int radius;
+    private final int radius;
     private boolean first = true;
 
     public AreaRandomTargetFinder(MovingEntity entity, long interval, int radius) {
@@ -16,6 +16,7 @@ public class AreaRandomTargetFinder extends TargetFinder {
         this.radius = radius;
     }
 
+    @Override
     protected void find() {
         Player near = null;
         double nearest = this.radius * this.radius;

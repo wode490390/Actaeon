@@ -4,7 +4,7 @@ import cn.nukkit.entity.Entity;
 import me.onebone.actaeon.entity.MovingEntity;
 import me.onebone.actaeon.task.AttackTask;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * AttackHook
@@ -77,10 +77,10 @@ public class AttackHook extends MovingEntityHook {
             if (this.entity.distance(hate) <= this.attackDistance) {
                 if (System.currentTimeMillis() - this.lastAttack > this.coolDown) {
                     if (this.entity.getTask() == null) {
-                        this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, new Random().nextInt(10) < this.effectual));
+                        this.entity.updateBotTask(new AttackTask(this.entity, hate, this.damage, this.viewAngle, ThreadLocalRandom.current().nextInt(10) < this.effectual));
                     }
                     this.lastAttack = System.currentTimeMillis();
-                    //if (this.jump && new Random().nextBoolean()) this.entity.jump();
+                    //if (this.jump && ThreadLocalRandom.current().nextBoolean()) this.entity.jump();
                 }
             }
         }

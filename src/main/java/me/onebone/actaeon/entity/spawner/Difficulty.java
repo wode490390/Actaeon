@@ -1,14 +1,15 @@
 package me.onebone.actaeon.entity.spawner;
 
-
 /**
  * @author <a href="mailto:kniffman@googlemail.com">Michael Gertz (mige)</a>
  */
 public enum Difficulty {
+    PEACEFUL(0),
+    EASY(1),
+    NORMAL(2),
+    HARD(3);
 
-    PEACEFUL(0), EASY(1), NORMAL(2), HARD(3);
-
-    private int difficulty;
+    private final int difficulty;
 
     private Difficulty(int difficulty) {
         this.difficulty = difficulty;
@@ -32,5 +33,4 @@ public enum Difficulty {
                 return PEACEFUL;
         }
     }
-
 }

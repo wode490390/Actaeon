@@ -1,7 +1,6 @@
-# Actaeon config file
 spawn-tick: 300
 disabled-worlds: ""
-#spawn chunk radius around player
+# spawn chunk radius around player
 spawn-radius: 3
 
 max-spawns:

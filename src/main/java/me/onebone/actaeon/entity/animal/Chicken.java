@@ -17,7 +17,12 @@ import java.util.Set;
 public class Chicken extends Animal implements EntityAgeable, Fallable {
 
     public static final int NETWORK_ID = 10;
-    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT_SEEDS), Item.get(Item.BEETROOT_SEED), Item.get(Item.MELON_SEEDS), Item.get(Item.PUMPKIN_SEEDS));
+
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(
+            Item.get(Item.WHEAT_SEEDS),
+            Item.get(Item.BEETROOT_SEED),
+            Item.get(Item.MELON_SEEDS),
+            Item.get(Item.PUMPKIN_SEEDS));
 
     private int nextEggTick;
 
@@ -85,9 +90,8 @@ public class Chicken extends Animal implements EntityAgeable, Fallable {
             }
             this.getLevel().dropExpOrb(this, Utils.rand(1, 4));
             return new Item[]{chicken, Item.get(Item.FEATHER, 0, Utils.rand(0, 3))};
-        } else {
-            return new Item[0];
         }
+        return new Item[0];
     }
 
     @Override

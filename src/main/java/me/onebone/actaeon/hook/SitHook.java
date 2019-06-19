@@ -9,9 +9,9 @@ import me.onebone.actaeon.target.EntityTarget;
  */
 public class SitHook extends MovingEntityHook {
 
-    private EntityTameable tameable;
+    private final EntityTameable tameable;
 
-    private boolean sitting;
+    //private boolean sitting;
 
     public SitHook(EntityTameable entity) {
         super(entity);
@@ -47,6 +47,6 @@ public class SitHook extends MovingEntityHook {
     }
 
     public void setSitting(boolean sitting) {
-        this.sitting = sitting;
+        //this.sitting = sitting;
     }
 }

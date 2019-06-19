@@ -49,5 +49,4 @@ public class BlazeSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Blaze";
     }
-
 }

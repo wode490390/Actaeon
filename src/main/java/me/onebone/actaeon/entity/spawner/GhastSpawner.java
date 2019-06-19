@@ -49,5 +49,4 @@ public class GhastSpawner extends AbstractEntitySpawner {
     public String getEntityName() {
         return "Ghast";
     }
-
 }

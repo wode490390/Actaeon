@@ -2,6 +2,7 @@ package me.onebone.actaeon.hook;
 
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityXPOrb;
+import cn.nukkit.level.GameRule;
 import cn.nukkit.level.particle.HeartParticle;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -10,14 +11,14 @@ import me.onebone.actaeon.entity.EntityAgeable;
 import me.onebone.actaeon.entity.animal.Animal;
 import me.onebone.actaeon.target.EntityTarget;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author CreeperFace
  */
 public class AnimalMateHook extends MovingEntityHook {
 
-    private Animal animal;
+    private final Animal animal;
     private Animal target;
 
     private int spawnBabyDelay;
@@ -33,8 +34,9 @@ public class AnimalMateHook extends MovingEntityHook {
 
     @Override
     public boolean shouldExecute() {
-        if (!this.animal.isInLove())
+        if (!this.animal.isInLove()) {
             return false;
+        }
 
         this.target = getNearby();
 
@@ -108,18 +110,16 @@ public class AnimalMateHook extends MovingEntityHook {
         baby.setGrowingAge(-24000);
         baby.spawnToAll();
 
-        Random random = this.animal.getLevel().rand;
-
         for (int i = 0; i < 7; ++i) {
-            double offsetX = random.nextDouble() * this.animal.getWidth() * 2 - this.animal.getWidth();
-            double offsetY = 0.5 + random.nextDouble() * this.animal.getHeight();
-            double offsetZ = random.nextDouble() * this.animal.getWidth() * 2 - this.animal.getWidth();
+            double offsetX = ThreadLocalRandom.current().nextDouble() * this.animal.getWidth() * 2 - this.animal.getWidth();
+            double offsetY = 0.5 + ThreadLocalRandom.current().nextDouble() * this.animal.getHeight();
+            double offsetZ = ThreadLocalRandom.current().nextDouble() * this.animal.getWidth() * 2 - this.animal.getWidth();
             this.animal.getLevel().addParticle(new HeartParticle(new Vector3(this.animal.getX() + offsetX, this.animal.getY() + offsetY, this.animal.getZ() + offsetZ)));
         }
 
-        if (this.animal.getLevel().getGameRules().getBoolean("doMobLoot")) {
+        if (this.animal.getLevel().getGameRules().getBoolean(GameRule.DO_MOB_LOOT)) {
             EntityXPOrb orb = (EntityXPOrb) Actaeon.create(EntityXPOrb.NETWORK_ID, animal);
-            orb.setExp(random.nextInt(7) + 1);
+            orb.setExp(ThreadLocalRandom.current().nextInt(7) + 1);
 
             orb.spawnToAll();
         }

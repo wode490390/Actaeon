@@ -9,13 +9,15 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import com.google.common.collect.Sets;
 import me.onebone.actaeon.hook.*;
 
-import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Cow extends Animal implements EntityAgeable {
 
     public static final int NETWORK_ID = 11;
-    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(Item.get(Item.WHEAT));
+
+    private static final Set<Item> FOLLOW_ITEMS = Sets.newHashSet(
+            Item.get(Item.WHEAT));
 
     public Cow(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -59,18 +61,16 @@ public class Cow extends Animal implements EntityAgeable {
     @Override
     public Item[] getDrops() {
         if (!isBaby()) {
-            Random random = new Random();
-            Item leather = Item.get(Item.LEATHER, 0, random.nextInt(2));
-            Item meat = Item.get(Item.RAW_BEEF, 0, random.nextInt(3) + 1);
+            Item leather = Item.get(Item.LEATHER, 0, ThreadLocalRandom.current().nextInt(2));
+            Item meat = Item.get(Item.RAW_BEEF, 0, ThreadLocalRandom.current().nextInt(3) + 1);
             EntityDamageEvent cause = this.getLastDamageCause();
             if (cause.getCause() == EntityDamageEvent.DamageCause.FIRE) {
-                meat = Item.get(Item.STEAK, 0, random.nextInt(3) + 1);
+                meat = Item.get(Item.STEAK, 0, ThreadLocalRandom.current().nextInt(3) + 1);
             }
-            this.getLevel().dropExpOrb(this, random.nextInt(3) + 1);
+            this.getLevel().dropExpOrb(this, ThreadLocalRandom.current().nextInt(3) + 1);
             return new Item[]{leather, meat};
-        } else {
-            return new Item[0];
         }
+        return new Item[0];
     }
 
     @Override
